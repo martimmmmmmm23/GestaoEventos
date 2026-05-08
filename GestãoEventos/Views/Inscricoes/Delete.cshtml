@@ -1,0 +1,31 @@
+﻿@model GestãoEventos.Data.Classes.Inscricao
+
+@{
+    ViewData["Title"] = "Eliminar Inscrição";
+}
+
+<h1>Eliminar Inscrição</h1>
+
+<h3 class="text-danger">Tem a certeza de que deseja eliminar esta inscrição?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Evento</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Evento.Nome)</dd>
+
+        <dt class="col-sm-3">Participante</dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Participante.Nome) <br />
+            <small class="text-muted">@Html.DisplayFor(model => model.Participante.Email)</small>
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        @* Mantém os IDs ocultos para o Controller saber o que apagar *@
+        <input type="hidden" asp-for="EventoId" />
+        <input type="hidden" asp-for="ParticipanteId" />
+
+        <input type="submit" value="Confirmar Eliminação" class="btn btn-danger" /> |
+        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar e Voltar à Lista</a>
+    </form>
+</div>
