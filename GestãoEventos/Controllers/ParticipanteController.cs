@@ -23,7 +23,7 @@ namespace GestãoEventos.Controllers
         // GET: Participantes
         public async Task<IActionResult> Index()
         {
-            var listParticipante = _context.Participante;
+            var listParticipante = _context.Participantes;
 
             return View(await listParticipante.ToListAsync());
         }
@@ -36,7 +36,7 @@ namespace GestãoEventos.Controllers
                 return NotFound();
             }
 
-            var participante = await _context.Participante
+            var participante = await _context.Participantes
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (participante == null)
             {
@@ -79,7 +79,7 @@ namespace GestãoEventos.Controllers
         {
             if (id == null) return NotFound();
 
-            var participante = await _context.Participante.FindAsync(id);
+            var participante = await _context.Participantes.FindAsync(id);
             if (participante == null) return NotFound();
 
             ViewBag.SelectedId = id;
@@ -98,13 +98,13 @@ namespace GestãoEventos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ParticipanteViewModel model)
         {
-            if (!(_context.Participante.Select(x => x.Id).Contains(id))) return NotFound();
+            if (!(_context.Participantes.Select(x => x.Id).Contains(id))) return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var participante = await _context.Participante.FindAsync(id);
+                    var participante = await _context.Participantes.FindAsync(id);
                     if (participante == null) return NotFound();
 
                     participante.Nome = model.Nome;
@@ -115,7 +115,7 @@ namespace GestãoEventos.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_context.Participante.Any(e => e.Id == id)) return NotFound();
+                    if (!_context.Participantes.Any(e => e.Id == id)) return NotFound();
                     else throw;
                 }
                 return RedirectToAction(nameof(Index));
@@ -131,7 +131,7 @@ namespace GestãoEventos.Controllers
                 return NotFound();
             }
 
-            var participante = await _context.Participante
+            var participante = await _context.Participantes
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (participante == null)
             {
@@ -146,10 +146,10 @@ namespace GestãoEventos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var participante = await _context.Participante.FindAsync(id);
+            var participante = await _context.Participantes.FindAsync(id);
             if (participante != null)
             {
-                _context.Participante.Remove(participante);
+                _context.Participantes.Remove(participante);
             }
 
             await _context.SaveChangesAsync();
