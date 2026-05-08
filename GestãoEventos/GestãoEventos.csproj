@@ -18,12 +18,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.23" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="ViewModel\Eventos\" />
     <Folder Include="ViewModel\Inscricoes\" />
-    <Folder Include="ViewModel\Participantes\" />
   </ItemGroup>
 
 </Project>
