@@ -1,9 +1,13 @@
+﻿using Microsoft.EntityFrameworkCore;
+using GestãoEventos.Data.Classes;
+using GestãoEventos.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 ﻿using GestãoEventos.Data.Classes;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestãoEventos.Data
 {
-    public class GestaoEventosDbContext : DbContext
+    public class GestaoEventosDbContext : IdentityDbContext<ApplicationUser>
     {
         public GestaoEventosDbContext(DbContextOptions<GestaoEventosDbContext> options)
      : base(options)
