@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using GestãoEventos.Data.Classes;
 using GestãoEventos.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using GestãoEventos.Data.Classes;
 
 namespace GestãoEventos.Data
 {
@@ -11,10 +11,10 @@ namespace GestãoEventos.Data
      : base(options)
         {
         }
-        DbSet<Evento> Eventos { get; set; }
+        public DbSet<Evento> Eventos { get; set; }
 
-        //DbSet<Inscricao> Inscricoes { get; set; }
+        public DbSet<Inscricao> Inscricoes { get; set; }
 
-        DbSet<Participante> Participantes { get; set; }
+        public DbSet<Participante> Participantes { get; set; } = default!;
     }
 }

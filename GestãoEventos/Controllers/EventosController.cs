@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GestãoEventos.Data;
 using GestãoEventos.Data.Classes;
+using GestãoEventos.ViewModel.Eventos;
 
 namespace GestãoEventos.Controllers
 {
@@ -22,25 +23,29 @@ namespace GestãoEventos.Controllers
         // GET: Eventos
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Evento.ToListAsync());
+            return View(await _context.Eventos.ToListAsync());
         }
 
         // GET: Eventos/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var evento = await _context.Evento
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var evento = await _context.Eventos
+                .FirstOrDefaultAsync(x => x.Id == id);
+
             if (evento == null)
-            {
                 return NotFound();
-            }
 
-            return View(evento);
+            var model = new EventoViewModel
+            {
+                Nome = evento.Nome,
+                Data = evento.Data,
+                Local = evento.Local
+            };
+
+            return View(model);
         }
 
         // GET: Eventos/Create
@@ -50,86 +55,85 @@ namespace GestãoEventos.Controllers
         }
 
         // POST: Eventos/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Data,Local")] Evento evento)
+        public async Task<IActionResult> Create(EventoViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var evento = new Evento
             {
-                _context.Add(evento);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(evento);
+                Nome = model.Nome,
+                Data = model.Data,
+                Local = model.Local
+            };
+
+            _context.Add(evento);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Eventos/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var evento = await _context.Evento.FindAsync(id);
+            var evento = await _context.Eventos.FindAsync(id);
+
             if (evento == null)
-            {
                 return NotFound();
-            }
-            return View(evento);
+
+            var model = new EventoViewModel
+            {
+                Nome = evento.Nome,
+                Data = evento.Data,
+                Local = evento.Local
+            };
+
+            ViewBag.Id = id; // porque não usas Id na ViewModel
+
+            return View(model);
         }
 
         // POST: Eventos/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Data,Local")] Evento evento)
+        public async Task<IActionResult> Edit(int id, EventoViewModel model)
         {
-            if (id != evento.Id)
-            {
+            var evento = await _context.Eventos.FindAsync(id);
+
+            if (evento == null)
                 return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Id = id;
+                return View(model);
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(evento);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EventoExists(evento.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(evento);
+            evento.Nome = model.Nome;
+            evento.Data = model.Data;
+            evento.Local = model.Local;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Eventos/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var evento = await _context.Evento
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var evento = await _context.Eventos
+                .FirstOrDefaultAsync(x => x.Id == id);
+
             if (evento == null)
-            {
                 return NotFound();
-            }
 
             return View(evento);
         }
@@ -139,19 +143,15 @@ namespace GestãoEventos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var evento = await _context.Evento.FindAsync(id);
+            var evento = await _context.Eventos.FindAsync(id);
+
             if (evento != null)
             {
-                _context.Evento.Remove(evento);
+                _context.Eventos.Remove(evento);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool EventoExists(int id)
-        {
-            return _context.Evento.Any(e => e.Id == id);
         }
     }
 }
