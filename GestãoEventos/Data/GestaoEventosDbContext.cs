@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using GestãoEventos.Data.Classes;
 
 namespace GestãoEventos.Data
 {
@@ -8,5 +9,6 @@ namespace GestãoEventos.Data
      : base(options)
         {
         }
+        public DbSet<GestãoEventos.Data.Classes.Participante> Participante { get; set; } = default!;
     }
 }
