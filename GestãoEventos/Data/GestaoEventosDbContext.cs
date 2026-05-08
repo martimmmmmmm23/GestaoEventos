@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using GestãoEventos.Data.Classes;
+using GestãoEventos.Models;
 
 namespace GestãoEventos.Data
 {
