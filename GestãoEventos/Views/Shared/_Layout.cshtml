@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -29,10 +33,13 @@
                             <a class="nav-link fs-6" asp-area="" asp-controller="Eventos" asp-action="Index">Eventos</a>
                         </li>
                         <div class="vr opacity-25 my-2" style="height: 30px;"></div>
-                        <li class="nav-item mx-1">
-                            <a class="nav-link fs-6" asp-area="" asp-controller="Participantes" asp-action="Index">Participantes</a>
-                        </li>
-                    </ul>
+                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item mx-1">
+                                    <a class="nav-link fs-6" asp-area="" asp-controller="Participantes" asp-action="Index">Participantes</a>
+                                </li>
+                            }
+                        </ul>
                     <li class="nav-item me-3 d-flex align-items-center">
                         <div class="form-check form-switch mb-0" title="Mudar Tema">
                             <input class="form-check-input" type="checkbox" role="switch" id="themeSwitch" style="cursor: pointer;">
