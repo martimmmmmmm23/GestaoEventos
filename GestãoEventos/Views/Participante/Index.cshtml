@@ -1,32 +1,28 @@
-﻿@model IEnumerable<GestãoEventos.Data.Classes.Evento>
+﻿@model IEnumerable<GestãoEventos.Data.Classes.Participante>
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Eventos</h1>
+<h1>Participantes</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
+    <a asp-action="Create" class="btn btn-success">Create New</a>
 </p>
-
 <table class="table">
     <thead>
         <tr>
             <th>Nome</th>
-            <th>Data</th>
-            <th>Local</th>
+            <th>Email</th>
             <th></th>
         </tr>
     </thead>
-
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
                 <td>@item.Nome</td>
-                <td>@item.Data.ToString("dd/MM/yyyy")</td>
-                <td>@item.Local</td>
+                <td>@item.Email</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
