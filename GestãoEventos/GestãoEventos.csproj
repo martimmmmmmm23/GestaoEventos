@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <Folder Include="ViewModel\Eventos\" />
-    <Folder Include="ViewModel\Inscricoes\" />
     <Folder Include="ViewModel\Participantes\" />
   </ItemGroup>
 
