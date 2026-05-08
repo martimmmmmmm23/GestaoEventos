@@ -1,8 +1,81 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model IEnumerable<GestãoEventos.ViewModel.Eventos.EventoViewModel>
+@{
+    ViewData["Title"] = "Bem-vindo";
+    var agora = DateTime.Now;
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    var eventosFuturos = Model?.Where(e => e.Data >= agora).OrderBy(e => e.Data).ToList()
+                        ?? new List<GestãoEventos.ViewModel.Eventos.EventoViewModel>();
+
+    var eventosPassados = Model?.Where(e => e.Data < agora).OrderByDescending(e => e.Data).ToList()
+                        ?? new List<GestãoEventos.ViewModel.Eventos.EventoViewModel>();
+}
+<head>
+    <link rel="stylesheet" href="../Views/Home/Index.css" asp-append-version="true" />
+</head>
+<header class="hero-bg text-white text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Gestão de Eventos</h1>
+        <p class="lead">Descubra e gira os melhores eventos num único lugar.</p>
+        <a href="#proximos" class="btn btn-primary btn-lg mt-3">Ver Próximos Eventos</a>
+    </div>
+</header>
+
+<div class="container my-5">
+    <!-- Próximos Eventos -->
+    <section id="proximos" class="mb-5">
+        <h2 class="titulo-sessao">Próximos Eventos</h2>
+        <div class="row g-4">
+            @if (!eventosFuturos.Any())
+            {
+                <div class="col-12 text-center py-5 border rounded bg-light">
+                    <p class="text-muted">Não há eventos agendados de momento.</p>
+                    <a asp-controller="Eventos" asp-action="Create" class="btn btn-outline-primary">Criar Novo Evento</a>
+                </div>
+            }
+            else
+            {
+                @foreach (var item in eventosFuturos)
+                {
+                    <div class="col-md-4">
+                        <div class="card h-100 cartao-evento">
+                            <div class="img-placeholder text-center py-4 bg-primary text-white">
+                                <i class="bi bi-calendar-check fs-1"></i>
+                            </div>
+                            <div class="card-body">
+                                <span class="badge bg-success mb-2">Confirmado</span>
+                                <div class="text-primary fw-bold small text-uppercase">@item.Data.ToString("dd MMM, yyyy")</div>
+                                <h5 class="card-title">@item.Nome</h5>
+                                <p class="card-text text-muted small"><i class="bi bi-geo-alt"></i> @item.Local</p>
+                            </div>
+                            <div class="card-footer bg-transparent border-0 pb-3">
+                                <a asp-action="Index" class="btn btn-sm btn-primary w-100">Ver Detalhes</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </section>
+
+    <hr class="my-5">
+
+    <!-- Eventos Passados -->
+    <section id="passados">
+        <h2 class="titulo-sessao">Eventos Realizados</h2>
+        <div class="row g-4">
+            @foreach (var item in eventosPassados)
+            {
+                <div class="col-md-4">
+                    <div class="card h-100 cartao-evento-passado">
+                        <div class="card-body">
+                            <span class="badge bg-secondary mb-2">Realizado</span>
+                            <div class="text-muted small">@item.Data.ToString("dd MMM, yyyy")</div>
+                            <h5 class="card-title">@item.Nome</h5>
+                            <p class="card-text small">@item.Local</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
 </div>

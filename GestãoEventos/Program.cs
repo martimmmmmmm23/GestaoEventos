@@ -1,7 +1,8 @@
 using GestãoEventos.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using GestãoEventos.Models;
+using Humanizer.Configuration;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestãoEventos
 {
@@ -13,8 +14,6 @@ namespace GestãoEventos
 
             // Configurar a Base de Dados
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContext<GestaoEventosDbContext>(options =>
-                options.UseSqlServer(connectionString));
 
             // Configurar Identity
             builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -32,7 +31,7 @@ namespace GestãoEventos
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddDbContext<GestaoEventosDbContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                    options.UseSqlServer(connectionString));
 
             var app = builder.Build();
 

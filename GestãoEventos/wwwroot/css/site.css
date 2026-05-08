@@ -2,6 +2,66 @@ html {
   font-size: 14px;
 }
 
+/* Paleta de Cores - Variáveis */
+/*LightMode*/
+:root {
+    --bg-body: #fdfaf8; /*Background - Creme claro*/
+    --bg-surface: #f5efe6; /*Fundo do Cabeçalho/Rodapé - Creme um pouco mais escuro*/
+    --text-main: #3e2723; /*Texto Principal - Castanho muito escuro*/
+    --text-muted: #8d7773; /*Texto Secundário - Castanho suave*/
+    --border-color: #e3d5ca; /*Linhas - Bege suave*/
+}
+
+/*DarkMode*/
+[data-theme='dark'] {
+    --bg-body: #121212; /*Background - Cinza muito escuro/Preto*/
+    --bg-surface: #1e1e1e; /*Fundo do Cabeçalho/Rodapé - Cinza escuro*/
+    --text-main: #f5f5f5; /*Texto Principal - Branco suave*/
+    --text-muted: #888888; /*Texto Secundário -  Cinza claro*/
+    --border-color: #262626; /*Linhas - Cinza escuro*/
+}
+
+/*Aplicar as cores aos elementos do site*/
+
+/*O corpo da página - entre o header e footer*/
+body {
+    background-color: var(--bg-body); /* Vai buscar a cor do fundo */
+    color: var(--text-main); /* Vai buscar a cor do texto */
+    transition: all 0.3s ease; /* Faz as cores mudarem suavemente em 0.3 segundos */
+}
+
+/*Header e Footer*/
+.theme-bar {
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    border-color: var(--border-color) !important; /* Muda a cor da linha de separação*/
+    transition: all 0.3s ease;
+}
+
+/*Textos e Links dentro das barras*/
+.theme-bar a, .theme-bar label, .theme-bar .vr, .theme-bar div {
+    color: var(--text-main) !important;
+    text-decoration: none; /* Remove o sublinhado padrão dos links */
+    transition: color 0.3s ease;
+}
+
+/*Efeito ao passar rato por cima dos links*/
+.theme-bar a:hover {
+    color: var(--text-muted) !important;
+}
+
+/*Botão Login*/
+.btn-theme {
+    border: 2px solid var(--text-main); /* Cria um contorno com a cor do texto */
+    color: var(--text-main); /* A letra fica com a cor do texto */
+    transition: all 0.3s ease;
+}
+
+/*Efeito ao passar rato por cima do login*/
+.btn-theme:hover {
+    background-color: var(--text-main); /* O fundo preenche-se com a cor do texto... */
+    color: var(--bg-surface); /* ... e a letra passa a ter a cor do fundo (Inverte as cores!) */
+}
 @media (min-width: 768px) {
   html {
     font-size: 16px;
