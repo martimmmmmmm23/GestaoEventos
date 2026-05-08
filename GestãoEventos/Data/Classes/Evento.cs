@@ -6,6 +6,8 @@ namespace GestãoEventos.Data.Classes
     {
         public int Id { get; set; }
 
+        
+
         [Required]
         [StringLength(100)]
         public string Nome { get; set; }
@@ -16,5 +18,6 @@ namespace GestãoEventos.Data.Classes
 
         [Required]
         public string Local { get; set; }
+        public ICollection<Inscricao> Inscricoes { get; set; } = new List<Inscricao>();
     }
 }
