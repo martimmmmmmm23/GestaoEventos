@@ -11,5 +11,6 @@ namespace GestãoEventos.Data
         {
         }
         public DbSet<GestãoEventos.Data.Classes.Participante> Participante { get; set; } = default!;
+        public DbSet<GestãoEventos.Data.Classes.Evento> Eventos { get; set; } = default!;
     }
 }

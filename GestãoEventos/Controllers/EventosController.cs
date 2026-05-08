@@ -23,7 +23,7 @@ namespace GestãoEventos.Controllers
         // GET: Eventos
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Evento.ToListAsync());
+            return View(await _context.Eventos.ToListAsync());
         }
 
         // GET: Eventos/Details/5
@@ -32,7 +32,7 @@ namespace GestãoEventos.Controllers
             if (id == null)
                 return NotFound();
 
-            var evento = await _context.Evento
+            var evento = await _context.Eventos
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (evento == null)
@@ -81,7 +81,7 @@ namespace GestãoEventos.Controllers
             if (id == null)
                 return NotFound();
 
-            var evento = await _context.Evento.FindAsync(id);
+            var evento = await _context.Eventos.FindAsync(id);
 
             if (evento == null)
                 return NotFound();
@@ -103,7 +103,7 @@ namespace GestãoEventos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, EventoViewModel model)
         {
-            var evento = await _context.Evento.FindAsync(id);
+            var evento = await _context.Eventos.FindAsync(id);
 
             if (evento == null)
                 return NotFound();
@@ -129,7 +129,7 @@ namespace GestãoEventos.Controllers
             if (id == null)
                 return NotFound();
 
-            var evento = await _context.Evento
+            var evento = await _context.Eventos
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (evento == null)
@@ -143,11 +143,11 @@ namespace GestãoEventos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var evento = await _context.Evento.FindAsync(id);
+            var evento = await _context.Eventos.FindAsync(id);
 
             if (evento != null)
             {
-                _context.Evento.Remove(evento);
+                _context.Eventos.Remove(evento);
                 await _context.SaveChangesAsync();
             }
 
