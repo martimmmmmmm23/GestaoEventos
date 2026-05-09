@@ -1,8 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
-
-@model IEnumerable<GestãoEventos.ViewModel.Eventos.EventoViewModel>
+﻿@model IEnumerable<GestãoEventos.ViewModel.Eventos.EventoViewModel>
 @{
     ViewData["Title"] = "Bem-vindo";
     var agora = DateTime.Now;
@@ -16,27 +12,24 @@
 <head>
     <link rel="stylesheet" href="../Views/Home/Index.css" asp-append-version="true" />
 </head>
-<header class="hero-bg text-white text-center">
+<header class="hero-bg text-center py-5 mb-5 text-theme-main">
     <div class="container">
         <h1 class="display-4 fw-bold">Gestão de Eventos</h1>
         <p class="lead">Descubra e gira os melhores eventos num único lugar.</p>
-        <a href="#proximos" class="btn btn-primary btn-lg mt-3">Ver Próximos Eventos</a>
+        <a href="#proximos" class="btn btn-primary btn-lg mt-3 rounded-pill px-4">Ver Próximos Eventos</a>
     </div>
 </header>
 
 <div class="container my-5">
     <!-- Próximos Eventos -->
     <section id="proximos" class="mb-5">
-        <h2 class="titulo-sessao">Próximos Eventos</h2>
+        <h2 class="titulo-sessao mb-4 text-theme-main fw-bold">Próximos Eventos</h2>
         <div class="row g-4">
             @if (!eventosFuturos.Any())
             {
-                <div class="col-12 text-center py-5 border rounded bg-light">
-                    <p class="text-muted">Não há eventos agendados de momento.</p>
-                    @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
-                    {
-                        <a asp-controller="Eventos" asp-action="Create" class="btn btn-outline-primary">Criar Novo Evento</a>
-                    }
+                <div class="col-12 text-center py-5 rounded bg-theme-surface">
+                    <p class="text-theme-muted fs-5">Não há eventos agendados de momento.</p>
+                    <a asp-controller="Eventos" asp-action="Create" class="btn btn-theme fw-bold">Criar Novo Evento</a>
                 </div>
             }
             else
@@ -44,18 +37,18 @@
                 @foreach (var item in eventosFuturos)
                 {
                     <div class="col-md-4">
-                        <div class="card h-100 cartao-evento">
-                            <div class="img-placeholder text-center py-4 bg-primary text-white">
+                        <div class="card h-100 cartao-evento bg-theme-surface border-0 shadow-sm">
+                            <div class="img-placeholder text-center py-4 rounded-top" style="background-color: var(--primary-accent); color: var(--bg-surface);">
                                 <i class="bi bi-calendar-check fs-1"></i>
                             </div>
                             <div class="card-body">
-                                <span class="badge bg-success mb-2">Confirmado</span>
-                                <div class="text-primary fw-bold small text-uppercase">@item.Data.ToString("dd MMM, yyyy")</div>
-                                <h5 class="card-title">@item.Nome</h5>
-                                <p class="card-text text-muted small"><i class="bi bi-geo-alt"></i> @item.Local</p>
+                                <span class="badge bg-success bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Confirmado</span>
+                                <div class="fw-bold small text-uppercase mb-1" style="color: var(--primary-accent);">@item.Data.ToString("dd MMM, yyyy")</div>
+                                <h5 class="card-title text-theme-main fw-bold">@item.Nome</h5>
+                                <p class="card-text text-theme-muted small"><i class="bi bi-geo-alt"></i> @item.Local</p>
                             </div>
-                            <div class="card-footer bg-transparent border-0 pb-3">
-                                <a asp-action="Index" class="btn btn-sm btn-primary w-100">Ver Detalhes</a>
+                            <div class="card-footer bg-transparent border-0 pb-3 pt-0">
+                                <a asp-action="Index" class="btn btn-sm btn-primary w-100 py-2 fw-bold">Ver Detalhes</a>
                             </div>
                         </div>
                     </div>
@@ -64,21 +57,21 @@
         </div>
     </section>
 
-    <hr class="my-5">
+    <hr class="my-5" style="border-color: var(--border-color) !important; opacity: 1;">
 
     <!-- Eventos Passados -->
     <section id="passados">
-        <h2 class="titulo-sessao">Eventos Realizados</h2>
+        <h2 class="titulo-sessao mb-4 text-theme-main fw-bold">Eventos Realizados</h2>
         <div class="row g-4">
             @foreach (var item in eventosPassados)
             {
                 <div class="col-md-4">
-                    <div class="card h-100 cartao-evento-passado">
+                    <div class="card h-100 cartao-evento-passado bg-theme-surface border-0 shadow-sm">
                         <div class="card-body">
-                            <span class="badge bg-secondary mb-2">Realizado</span>
-                            <div class="text-muted small">@item.Data.ToString("dd MMM, yyyy")</div>
-                            <h5 class="card-title">@item.Nome</h5>
-                            <p class="card-text small">@item.Local</p>
+                            <span class="badge bg-secondary bg-opacity-75 mb-2 px-3 rounded-pill">Realizado</span>
+                            <div class="text-theme-muted small mb-1">@item.Data.ToString("dd MMM, yyyy")</div>
+                            <h5 class="card-title text-theme-main fw-bold">@item.Nome</h5>
+                            <p class="card-text text-theme-muted small">@item.Local</p>
                         </div>
                     </div>
                 </div>

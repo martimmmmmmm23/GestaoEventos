@@ -1,29 +1,29 @@
 ﻿@model GestãoEventos.Data.Classes.Evento
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Eliminar";
 }
 
-<h1>Delete</h1>
-
+<h1 class="text-theme-main fw-bold my-4">@ViewData["Title"]</h1>
 <h3>Tem a certeza que quer eliminar este evento?</h3>
 
 <div>
     <hr />
+    <dl class="row text-theme-main">
+        <dt class="col-sm-3 text-theme-muted">Nome</dt>
+        <dd class="col-sm-9">@Model.Nome</dd>
 
-    <dl class="row">
-        <dt class="col-sm-2">Nome</dt>
-        <dd class="col-sm-10">@Model.Nome</dd>
+        <dt class="col-sm-3 text-theme-muted">Data</dt>
+        <dd class="col-sm-9">@Model.Data.ToString("dd/MM/yyyy")</dd>
 
-        <dt class="col-sm-2">Data</dt>
-        <dd class="col-sm-10">@Model.Data.ToString("dd/MM/yyyy")</dd>
-
-        <dt class="col-sm-2">Local</dt>
-        <dd class="col-sm-10">@Model.Local</dd>
+        <dt class="col-sm-3 text-theme-muted">Local</dt>
+        <dd class="col-sm-9">@Model.Local</dd>
     </dl>
 
-    <form asp-action="Delete" asp-route-id="@Model.Id">
-        <input type="submit" value="Delete" class="btn btn-danger" />
-        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-    </form>
+    <div class="mt-4">
+        <form asp-action="Delete" asp-route-id="@Model.Id">
+            <input type="submit" value="Eliminar" class="btn btn-danger px-5 rounded-pill" />
+            <a asp-action="Index" class="btn btn-secondary px-5 rounded-pill">Cancelar</a>
+        </form>
+    </div>
 </div>
