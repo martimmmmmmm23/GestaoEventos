@@ -32,9 +32,9 @@
                         <li class="nav-item mx-1">
                             <a class="nav-link fs-6" asp-area="" asp-controller="Eventos" asp-action="Index">Eventos</a>
                         </li>
-                        <div class="vr opacity-25 my-2" style="height: 30px;"></div>
                         @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
                             {
+                            <div class="vr opacity-25 my-2" style="height: 30px;"></div>
                                 <li class="nav-item mx-1">
                                     <a class="nav-link fs-6" asp-area="" asp-controller="Participantes" asp-action="Index">Participantes</a>
                                 </li>

@@ -1,4 +1,8 @@
-﻿@model IEnumerable<GestãoEventos.ViewModel.Eventos.EventoViewModel>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@model IEnumerable<GestãoEventos.ViewModel.Eventos.EventoViewModel>
 @{
     ViewData["Title"] = "Bem-vindo";
     var agora = DateTime.Now;
@@ -29,7 +33,10 @@
             {
                 <div class="col-12 text-center py-5 rounded bg-theme-surface">
                     <p class="text-theme-muted fs-5">Não há eventos agendados de momento.</p>
-                    <a asp-controller="Eventos" asp-action="Create" class="btn btn-theme fw-bold">Criar Novo Evento</a>
+                    @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                    {
+                          <a asp-controller="Eventos" asp-action="Create" class="btn btn-theme fw-bold">Criar Novo Evento</a>
+                    }
                 </div>
             }
             else
