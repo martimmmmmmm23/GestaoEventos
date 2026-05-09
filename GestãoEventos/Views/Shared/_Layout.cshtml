@@ -78,7 +78,16 @@
     <script>
         const themeSwitch = document.getElementById('themeSwitch');
         const themeLabel = document.getElementById('themeLabel');
+        const htmlElement = document.documentElement;
 
+        //Qunado mudamos o botao do tema, grava a escolha
+        const savedTheme = localStorage.getItem('theme'); //Verifica se tem algum 'bilhete' guardado
+
+        if (savedTheme === 'dark') {
+            htmlElement.setAttribute('data-theme', 'dark');
+            themeSwitch.checked = true; // Garante que o botão deslizante está ligado
+            themeLabel.innerText = '☾';
+        }
         // Fica à espera que o botão deslize
         themeSwitch.addEventListener('change', function () {
 
@@ -88,6 +97,7 @@
                 document.documentElement.setAttribute('data-theme', 'dark');
                 // 2. Troca o ícone para a Lua
                 themeLabel.innerHTML = '☾';
+                localStorage.setItem('theme', 'dark'); //Cria um 'bilhete' theme com o valor 'dark'
             }
             // Se o botão for desligado...
             else {
@@ -95,6 +105,7 @@
                 document.documentElement.setAttribute('data-theme', 'light');
                 // 2. Troca o ícone para o Sol
                 themeLabel.innerHTML = '☼';
+                localStorage.setItem('theme', 'light');
             }
         });
     </script>

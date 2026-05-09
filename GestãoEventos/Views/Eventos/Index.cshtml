@@ -4,35 +4,39 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Eventos</h1>
+<h1 class="text-theme-main fw-bold my-4">Eventos</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
+    <a asp-action="Create" class="btn btn-primary rounded-pill px-4">
+        <i class="bi bi-plus-lg"></i> Novo Evento
+    </a>
 </p>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Data</th>
-            <th>Local</th>
-            <th></th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="="bg-theme-surface p-3 rounded-3 shadow-sm">
+    <table class="table">
+        <thead class="text-theme-main">
             <tr>
-                <td>@item.Nome</td>
-                <td>@item.Data.ToString("dd/MM/yyyy")</td>
-                <td>@item.Local</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
+                <th>Nome</th>
+                <th>Data</th>
+                <th>Local</th>
+                <th class="text-end">Ações</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+
+        <tbody class="text-theme-main">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="fw-bold">@item.Nome</td>
+                    <td>@item.Data.ToString("dd/MM/yyyy")</td>
+                    <td>@item.Local</td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="mx-1" style="color: var(--primary-accent);">Editar</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id" class="mx-1" style="color: var(--primary-accent);">Detalhes</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="mx-1" style="color: var(--primary-accent);">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
