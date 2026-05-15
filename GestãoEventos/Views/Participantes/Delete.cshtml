@@ -1,0 +1,27 @@
+﻿@model GestãoEventos.Data.Classes.Participante
+
+@{
+    ViewData["Title"] = "Eliminar";
+}
+
+<h1 class="text-theme-main fw-bold my-4">@ViewData["Title"]</h1>
+<h3>Tem a certeza que quer eliminar o participante?</h3>
+
+<div>
+    <hr />
+    <dl class="row text-theme-main">
+        <dt class="col-sm-3 text-theme-muted">Nome</dt>
+        <dd class="col-sm-9">@Model.Nome</dd>
+
+        <dt class="col-sm-3 text-theme-muted">Email</dt>
+        <dd class="col-sm-9">@Model.Email</dd>
+    </dl>
+
+    <div class="mt-4">
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <input type="submit" value="Eliminar" class="btn btn-danger px-5 rounded-pill" />
+            <a asp-action="Index" class="btn btn-secondary px-5 rounded-pill">Cancelar</a>
+        </form>
+    </div>
+</div>

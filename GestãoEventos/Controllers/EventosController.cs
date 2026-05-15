@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using GestãoEventos.Data;
 using GestãoEventos.Data.Classes;
 using GestãoEventos.ViewModel.Eventos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GestãoEventos.Controllers
 {
@@ -33,7 +34,8 @@ namespace GestãoEventos.Controllers
                 return NotFound();
 
             var evento = await _context.Eventos
-                .FirstOrDefaultAsync(x => x.Id == id);
+                        .Include(e => e.Inscricoes)
+                        .FirstOrDefaultAsync(x => x.Id == id);
 
             if (evento == null)
                 return NotFound();
@@ -42,13 +44,18 @@ namespace GestãoEventos.Controllers
             {
                 Nome = evento.Nome,
                 Data = evento.Data,
-                Local = evento.Local
+                Local = evento.Local,
+                Image = evento.Image,
+                Descricao = evento.Descricao,
+                Detalhes = evento.Detalhes,
+                Inscricoes = evento.Inscricoes
             };
 
             return View(model);
         }
 
         // GET: Eventos/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
@@ -57,6 +64,7 @@ namespace GestãoEventos.Controllers
         // POST: Eventos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(EventoViewModel model)
         {
             if (!ModelState.IsValid)
@@ -66,8 +74,34 @@ namespace GestãoEventos.Controllers
             {
                 Nome = model.Nome,
                 Data = model.Data,
-                Local = model.Local
+                Local = model.Local,
+                Descricao = model.Descricao,
+                Detalhes = model.Detalhes
             };
+
+            if (model.ImageFile != null)
+            {
+                if (model.ImageFile.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("ImageFile", "A imagem não pode exceder 5MB.");
+                    return View(model);
+                }
+
+                var fileName = Guid.NewGuid().ToString() +
+                               Path.GetExtension(model.ImageFile.FileName);
+
+                var path = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot/images",
+                    fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+
+                evento.Image = "/images/" + fileName;
+            }
 
             _context.Add(evento);
             await _context.SaveChangesAsync();
@@ -76,6 +110,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Eventos/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -90,7 +125,10 @@ namespace GestãoEventos.Controllers
             {
                 Nome = evento.Nome,
                 Data = evento.Data,
-                Local = evento.Local
+                Local = evento.Local,
+                Image = evento.Image,
+                Descricao = evento.Descricao,
+                Detalhes = evento.Detalhes
             };
 
             ViewBag.Id = id; // porque não usas Id na ViewModel
@@ -101,6 +139,7 @@ namespace GestãoEventos.Controllers
         // POST: Eventos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, EventoViewModel model)
         {
             var evento = await _context.Eventos.FindAsync(id);
@@ -117,6 +156,33 @@ namespace GestãoEventos.Controllers
             evento.Nome = model.Nome;
             evento.Data = model.Data;
             evento.Local = model.Local;
+            evento.Descricao = model.Descricao;
+            evento.Detalhes = model.Detalhes;
+
+            if (model.ImageFile != null)
+            {
+                if (model.ImageFile.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("ImageFile", "A imagem não pode exceder 5MB.");
+                    ViewBag.Id = id;
+                    return View(model);
+                }
+
+                var fileName = Guid.NewGuid().ToString() +
+                               Path.GetExtension(model.ImageFile.FileName);
+
+                var path = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot/images",
+                    fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+
+                evento.Image = "/images/" + fileName;
+            }
 
             await _context.SaveChangesAsync();
 
@@ -124,6 +190,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Eventos/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -141,6 +208,7 @@ namespace GestãoEventos.Controllers
         // POST: Eventos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var evento = await _context.Eventos.FindAsync(id);

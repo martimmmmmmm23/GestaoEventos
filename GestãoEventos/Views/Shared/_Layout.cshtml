@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -28,11 +32,14 @@
                         <li class="nav-item mx-1">
                             <a class="nav-link fs-6" asp-area="" asp-controller="Eventos" asp-action="Index">Eventos</a>
                         </li>
-                        <div class="vr opacity-25 my-2" style="height: 30px;"></div>
-                        <li class="nav-item mx-1">
-                            <a class="nav-link fs-6" asp-area="" asp-controller="Participantes" asp-action="Index">Participantes</a>
-                        </li>
-                    </ul>
+                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                            {
+                            <div class="vr opacity-25 my-2" style="height: 30px;"></div>
+                                <li class="nav-item mx-1">
+                                    <a class="nav-link fs-6" asp-area="" asp-controller="Participantes" asp-action="Index">Participantes</a>
+                                </li>
+                            }
+                        </ul>
                     <li class="nav-item me-3 d-flex align-items-center">
                         <div class="form-check form-switch mb-0" title="Mudar Tema">
                             <input class="form-check-input" type="checkbox" role="switch" id="themeSwitch" style="cursor: pointer;">
@@ -43,9 +50,30 @@
                         </div>
                     </li>
                     <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="btn btn-theme fw-bold px-4" asp-area="Identity" asp-page="/Account/Login">Login</a>
-                        </li>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            // O UTILIZADOR ESTÁ LOGADO
+                            <li class="nav-item">
+                                <a class="nav-link fs-6" asp-area="Identity" asp-page="/Account/Manage/Index" title="Gerir Conta">
+                                    Olá, @User.Identity?.Name!
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                    <button type="submit" class="nav-link fs-6 bg-transparent border-0" style="color: inherit;">Sair</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            // O UTILIZADOR É ANÓNIMO
+                            <li class="nav-item">
+                                <a class="nav-link fs-6" asp-area="Identity" asp-page="/Account/Register">Registar</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fs-6" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -78,7 +106,16 @@
     <script>
         const themeSwitch = document.getElementById('themeSwitch');
         const themeLabel = document.getElementById('themeLabel');
+        const htmlElement = document.documentElement;
 
+        //Qunado mudamos o botao do tema, grava a escolha
+        const savedTheme = localStorage.getItem('theme'); //Verifica se tem algum 'bilhete' guardado
+
+        if (savedTheme === 'dark') {
+            htmlElement.setAttribute('data-theme', 'dark');
+            themeSwitch.checked = true; // Garante que o botão deslizante está ligado
+            themeLabel.innerText = '☾';
+        }
         // Fica à espera que o botão deslize
         themeSwitch.addEventListener('change', function () {
 
@@ -88,6 +125,7 @@
                 document.documentElement.setAttribute('data-theme', 'dark');
                 // 2. Troca o ícone para a Lua
                 themeLabel.innerHTML = '☾';
+                localStorage.setItem('theme', 'dark'); //Cria um 'bilhete' theme com o valor 'dark'
             }
             // Se o botão for desligado...
             else {
@@ -95,6 +133,7 @@
                 document.documentElement.setAttribute('data-theme', 'light');
                 // 2. Troca o ícone para o Sol
                 themeLabel.innerHTML = '☼';
+                localStorage.setItem('theme', 'light');
             }
         });
     </script>
