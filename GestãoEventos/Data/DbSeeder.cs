@@ -12,7 +12,7 @@ namespace GestãoEventos.Data
             var roleManager = service.GetService<RoleManager<IdentityRole>>();
 
             // Criar Roles se não existirem
-            await roleManager.CreateAsync(new IdentityRole("Admin"));
+            await roleManager.CreateAsync(new IdentityRole("Organizador"));
             await roleManager.CreateAsync(new IdentityRole("Utilizador"));
 
             // Criar um Admin se não existir
@@ -33,7 +33,7 @@ namespace GestãoEventos.Data
                 await userManager.CreateAsync(adminUser, "Admin123!");
 
                 // Atribuir Role Admin
-                await userManager.AddToRoleAsync(adminUser, "Admin");
+                await userManager.AddToRoleAsync(adminUser, "Organizador");
             }
         }
     }

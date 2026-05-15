@@ -18,7 +18,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Inscricoes
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Index()
         {
             var inscricoes = await _context.Inscricoes // Include é usado para carregar os dados relacionados, ou seja, os detalhes do evento e do participante associados a cada inscrição. Isso evita a necessidade de consultas adicionais ao banco de dados para obter essas informações quando a view for renderizada.
@@ -122,7 +122,7 @@ namespace GestãoEventos.Controllers
 
         // GET: Inscricoes/Edit/5
 
-        [Authorize(Roles = "Admin")] // Apenas organizadores podem editar
+        [Authorize(Roles = "Organizador")] // Apenas organizadores podem editar
         public async Task<IActionResult> Edit(int? eventoId, int? participanteId)
         {
             if (eventoId == null || participanteId == null)
@@ -150,7 +150,7 @@ namespace GestãoEventos.Controllers
         // POST: Inscricoes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Edit(int oldEventoId, int oldParticipanteId, [Bind("EventoId,ParticipanteId")] Inscricao inscricao)
         {
             // Verificamos se os IDs do formulário correspondem aos que queríamos editar
@@ -188,7 +188,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Inscricoes/Delete/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Delete(int? eventoId, int? participanteId)
         {
             if (eventoId == null || participanteId == null) return NotFound();
@@ -206,7 +206,7 @@ namespace GestãoEventos.Controllers
         // POST: Inscricoes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> DeleteConfirmed(int eventoId, int participanteId)
         {
             var inscricao = await _context.Inscricoes

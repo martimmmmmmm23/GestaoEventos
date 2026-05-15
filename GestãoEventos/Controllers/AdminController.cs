@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace GestãoEventos.Controllers
 {
     // Controlador para funcionalidades administrativas
-    [Authorize(Roles = "Admin")] // Apenas usuários com a função "Admin" podem acessar
+    [Authorize(Roles = "Organizador")] // Apenas usuários com a função "Organizador" podem acessar
     public class AdminController : Controller
     {
         public IActionResult Index()
