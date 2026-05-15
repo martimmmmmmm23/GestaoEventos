@@ -56,7 +56,7 @@ namespace GestãoEventos.Controllers
 
 
         // GET: Participantes/Edit/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -78,7 +78,7 @@ namespace GestãoEventos.Controllers
         // POST: Participantes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Edit(int id, ParticipanteViewModel model)
         {
             if (!(_context.Participantes.Select(x => x.Id).Contains(id))) return NotFound();
@@ -107,7 +107,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Participantes/Delete/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -128,7 +128,7 @@ namespace GestãoEventos.Controllers
         // POST: Participantes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var participante = await _context.Participantes.FindAsync(id);

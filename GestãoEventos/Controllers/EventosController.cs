@@ -56,7 +56,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Eventos/Create
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public IActionResult Create()
         {
             return View();
@@ -65,7 +65,7 @@ namespace GestãoEventos.Controllers
         // POST: Eventos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Create(EventoViewModel model)
         {
             if (!ModelState.IsValid)
@@ -112,7 +112,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Eventos/Edit/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -142,7 +142,7 @@ namespace GestãoEventos.Controllers
         // POST: Eventos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Edit(int id, EventoViewModel model)
         {
             var evento = await _context.Eventos.FindAsync(id);
@@ -194,7 +194,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Eventos/Delete/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -212,7 +212,7 @@ namespace GestãoEventos.Controllers
         // POST: Eventos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var evento = await _context.Eventos.FindAsync(id);

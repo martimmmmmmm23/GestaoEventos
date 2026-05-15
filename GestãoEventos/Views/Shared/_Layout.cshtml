@@ -32,7 +32,7 @@
                         <li class="nav-item mx-1">
                             <a class="nav-link fs-6" asp-area="" asp-controller="Eventos" asp-action="Index">Eventos</a>
                         </li>
-                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("Organizador"))
                             {
                             <div class="vr opacity-25 my-2" style="height: 30px;"></div>
                             <li class="nav-item mx-1">
@@ -58,7 +58,7 @@
                         {
                             // O UTILIZADOR ESTÁ LOGADO
                             <li class="nav-item">
-                                <a class="nav-link fs-6" asp-area="Identity" asp-page="/Account/Manage/Index" title="Gerir Conta">
+                                <a class="nav-link" title="Gerir Conta">
                                     Olá, @User.Identity?.Name!
                                 </a>
                             </li>
