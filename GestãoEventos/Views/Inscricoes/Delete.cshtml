@@ -1,31 +1,29 @@
-﻿@model GestãoEventos.Data.Classes.Inscricao
+﻿@model GestãoEventos.ViewModel.Inscricoes.InscricaoViewModel
 
 @{
     ViewData["Title"] = "Eliminar Inscrição";
 }
 
-<h1>Eliminar Inscrição</h1>
+<h1 class="text-theme-main fw-bold my-4">@ViewData["Title"]</h1>
+<h3>Tem a certeza que quer eliminar esta inscrição?</h3>
 
-<h3 class="text-danger">Tem a certeza de que deseja eliminar esta inscrição?</h3>
 <div>
     <hr />
-    <dl class="row">
-        <dt class="col-sm-3">Evento</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Evento.Nome)</dd>
+    <dl class="row text-theme-main">
+        <dt class="col-sm-3 text-theme-muted">Nome do Participante</dt>
+        <dd class="col-sm-9 te">@Model.Nome</dd>
 
-        <dt class="col-sm-3">Participante</dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Participante.Nome) <br />
-            <small class="text-muted">@Html.DisplayFor(model => model.Participante.Email)</small>
-        </dd>
+        <dt class="col-sm-3 text-theme-muted">Email do Participante</dt>
+        <dd class="col-sm-9">@Model.Email</dd>
+
+        <dt class="col-sm-3 text-theme-muted">Nome do Evento</dt>
+        <dd class="col-sm-9">@Model.NomeEvento</dd>
     </dl>
 
-    <form asp-action="Delete">
-        @* Mantém os IDs ocultos para o Controller saber o que apagar *@
-        <input type="hidden" asp-for="EventoId" />
-        <input type="hidden" asp-for="ParticipanteId" />
-
-        <input type="submit" value="Confirmar Eliminação" class="btn btn-danger" /> |
-        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar e Voltar à Lista</a>
-    </form>
+    <div class="mt-4">
+        <form asp-action="Delete" asp-route-id="@Model.EventoId">
+            <input type="submit" value="Eliminar" class="btn btn-danger px-5 rounded-pill" />
+            <a asp-action="Index" class="btn btn-secondary px-5 rounded-pill">Cancelar</a>
+        </form>
+    </div>
 </div>
