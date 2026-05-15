@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GestãoEventos.Controllers
 {
@@ -47,6 +48,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Participantes/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
@@ -56,6 +58,7 @@ namespace GestãoEventos.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(ParticipanteViewModel model)
         {
             if (ModelState.IsValid)
@@ -75,6 +78,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Participantes/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -93,9 +97,10 @@ namespace GestãoEventos.Controllers
             return View(viewModel);
         }
 
-            // POST: Participantes/Edit/5
-            [HttpPost]
+        // POST: Participantes/Edit/5
+        [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, ParticipanteViewModel model)
         {
             if (!(_context.Participantes.Select(x => x.Id).Contains(id))) return NotFound();
@@ -124,6 +129,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Participantes/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -144,6 +150,7 @@ namespace GestãoEventos.Controllers
         // POST: Participantes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var participante = await _context.Participantes.FindAsync(id);
