@@ -22,6 +22,8 @@ namespace GestãoEventos.Data.Classes
         [Display(Name = "Imagem")]
         public string? Image { get; set; }
 
+        public IFormFile? ImageFile { get; set; }
+
         [Display(Name = "Descrição")]
         [StringLength(500)]
         public string? Descricao { get; set; }
