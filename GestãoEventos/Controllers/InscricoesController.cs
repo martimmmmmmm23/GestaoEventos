@@ -18,7 +18,6 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Inscricoes
-        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Index()
         {
             // 1. Guardar o email numa variável ANTES da consulta à base de dados
@@ -54,7 +53,7 @@ namespace GestãoEventos.Controllers
 
             if (inscricao == null) return NotFound();
 
-            if (!User.IsInRole("Admin") && inscricao.Participante.Email != User.Identity.Name)
+            if (!User.IsInRole("Organizador") && inscricao.Participante.Email != User.Identity.Name)
             {
                 return Forbid(); // Dá erro 403 - Acesso Negado
             }

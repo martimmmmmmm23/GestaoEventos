@@ -24,7 +24,7 @@ namespace GestãoEventos.Data
             {
                 var admin = new ApplicationUser
                 {
-                    UserName = "admin",
+                    UserName = "admin@portal.pt",
                     Email = "admin@portal.pt",
                     NomeCompleto = "Administrador do Sistema",
                     EmailConfirmed = true
