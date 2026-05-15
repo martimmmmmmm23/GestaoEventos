@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GestãoEventos.Data.Classes
 {
@@ -22,6 +23,7 @@ namespace GestãoEventos.Data.Classes
         [Display(Name = "Imagem")]
         public string? Image { get; set; }
 
+        [NotMapped]
         public IFormFile? ImageFile { get; set; }
 
         [Display(Name = "Descrição")]
