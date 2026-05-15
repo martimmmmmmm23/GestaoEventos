@@ -1,20 +1,19 @@
 using GestãoEventos.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using GestãoEventos.Models;
+using Humanizer.Configuration;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestãoEventos
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Configurar a Base de Dados
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContext<GestaoEventosDbContext>(options =>
-                options.UseSqlServer(connectionString));
 
             // Configurar Identity
             builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -32,7 +31,7 @@ namespace GestãoEventos
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddDbContext<GestaoEventosDbContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                    options.UseSqlServer(connectionString));
 
             var app = builder.Build();
 
@@ -64,6 +63,19 @@ namespace GestãoEventos
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    await DbSeeder.SeedRolesAndAdminAsync(services);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erro ao criar Seed: {ex.Message}");
+                }
+            }
 
             app.Run();
         }

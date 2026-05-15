@@ -11,7 +11,7 @@ namespace GestãoEventos.ViewModel.Participantes
 
         [Required(ErrorMessage = "O email é obrigatório.")]
         [EmailAddress(ErrorMessage = "Insira um endereço de email válido.")]
-        [Display(Name = "Email Principal")]
+        [Display(Name = "Email do Participante")]
         public string Email { get; set; }
 
         // Example of an extra property often needed in UIs but not in the Database

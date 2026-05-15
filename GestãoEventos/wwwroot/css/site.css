@@ -1,22 +1,117 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
+/*O corpo da página - entre o header e footer*/
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    background-color: var(--bg-body); /* Vai buscar a cor do fundo */
+    color: var(--text-main); /* Vai buscar a cor do texto */
+    transition: all 0.3s ease; /* Faz as cores mudarem suavemente em 0.3 segundos */
+}
+
+/* Paleta de Cores - Variáveis */
+/*LightMode*/
+:root {
+    --bg-body: #fdfaf8; /*Background - Creme claro*/
+    --bg-surface: #efe6dd; /*Fundo do Cabeçalho/Rodapé - Creme um pouco mais escuro*/
+    --text-main: #3e2723; /*Texto Principal - Castanho muito escuro*/
+    --text-muted: #8d7773; /*Texto Secundário - Castanho suave*/
+    --border-color: #e3d5ca; /*Linhas (Tabela, à volta dos cartões de evento) - Bege suave*/
+    --primary-accent: #a67c52; /*Cor de destaque para botões secundários - O castanho claro do Login*/
+}
+
+/*DarkMode*/
+[data-theme='dark'] {
+    --bg-body: #121212; /*Cinza muito escuro/Preto*/
+    --bg-surface: #1e1e1e; /*Cinza escuro*/
+    --text-main: #f5f5f5; /*Branco suave*/
+    --text-muted: #888888; /*Cinza claro*/
+    --border-color: #262626; /*Cinza escuro*/
+    --primary-accent: #d4a373; /*Ouro Velho*/
+}
+
+/*Classes de ajuda*/
+/*Aplicar as cores aos elementos do site*/
+
+/*Header e Footer*/
+.theme-bar {
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    border-color: var(--border-color) !important; /* Muda a cor da linha de separação*/
+    transition: all 0.3s ease;
+}
+
+/*Textos e Links dentro das barras*/
+.theme-bar a, .theme-bar label, .theme-bar .vr, .theme-bar div {
+    color: var(--text-main) !important; /*!importante - vai buscar a cor que eu disse e não ao bootstrap*/
+    text-decoration: none; /* Remove o sublinhado padrão dos links */
+    transition: color 0.3s ease;
+}
+
+/*Efeito ao passar rato por cima dos links*/
+.theme-bar a:hover {
+    color: var(--text-muted) !important;
+}
+
+/*Botão Login*/
+.btn-theme {
+    border: 2px solid var(--text-main); /* Cria um contorno com a cor do texto */
+    color: var(--text-main); /* A letra fica com a cor do texto */
+    transition: all 0.3s ease;
+}
+
+/*Efeito ao passar rato por cima do login*/
+.btn-theme:hover {
+    background-color: var(--text-main); /*O fundo preenche-se com a cor do texto*/
+    color: var(--bg-surface); /*A letra passa a ter a cor do fundo*/
+}
+
+/* Os botões de cartão (como o 'Ver Detalhes') usam a cor secundária de destaque */
+.btn-primary {
+    background-color: var(--primary-accent) !important;
+    border-color: var(--primary-accent) !important;
+    color: var(--bg-surface) !important; /* A letra fica com a cor de fundo do header */
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-accent) !important;
+    opacity: 0.85; /* feedback visual suave */
+}
+
+/* Texto Principal (Castanho no claro, Branco no escuro) */
+.text-theme-main {
+    color: var(--text-main) !important;
+}
+
+/* Texto Secundário (Apagado/Suave) */
+.text-theme-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Fundo de Superfície (Ideal para Cartões) */
+.bg-theme-surface {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important; /* Dá uma borda suave ao cartão */
+}
+
+/* Cor do botão switch - dark */
+.form-check-input:checked {
+    background-color: var(--primary-accent) !important;
+    border-color: var(--primary-accent) !important;
+}
+
+/* Cor do "brilho" à volta do botão switch */
+.form-check-input:focus {
+    border-color: var(--primary-accent) !important;
+    box-shadow: 0 0 0 0.25rem rgba(212, 163, 115, 0.25) !important; /*Substitui a cor do brrilho*/
 }

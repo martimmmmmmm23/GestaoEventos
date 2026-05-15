@@ -14,9 +14,11 @@ namespace GestãoEventos.ViewModel.Inscricoes
         [Display(Name = "Email address")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "O evento é obrigatório.")]
+        [Required(ErrorMessage = "A seleção do evento é obrigatória.")]
         [Display(Name = "Evento")]
-        public string Evento { get; set; }
+        public int EventoId { get; set; }
+
+        public string? NomeEvento { get; set; }
 
         public SelectList? EventosDisponiveis { get; set; } // SelectList facilita a criação de dropdowns no Razor, permitindo ver a lista de opções para o utilizador escolher.
 

@@ -1,21 +1,35 @@
-using System.Diagnostics;
+using GestãoEventos.Data;
 using GestãoEventos.Models;
+using GestãoEventos.ViewModel.Eventos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace GestãoEventos.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly GestaoEventosDbContext _context;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(GestaoEventosDbContext context, ILogger<HomeController> logger)
         {
+            _context = context;
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var eventosDaDb = await _context.Eventos.ToListAsync();
+            var model = eventosDaDb.Select(e => new EventoViewModel
+            {
+                Nome = e.Nome,
+                Data = e.Data,
+                Local = e.Local
+
+            }).ToList();
+
+            return View(model);
         }
 
         public IActionResult Privacy()

@@ -1,0 +1,29 @@
+﻿@model GestãoEventos.Data.Classes.Inscricao
+
+@{
+    ViewData["Title"] = "Detalhes da Inscrição";
+}
+
+<h1>Detalhes</h1>
+
+<div>
+    <h4>Dados da Inscrição</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Nome do Evento</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Evento.Nome)</dd>
+
+        <dt class="col-sm-3">Local do Evento</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Evento.Local)</dd>
+
+        <dt class="col-sm-3">Nome do Participante</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Participante.Nome)</dd>
+
+        <dt class="col-sm-3">Email do Participante</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Participante.Email)</dd>
+    </dl>
+</div>
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-eventoId="@Model.EventoId" asp-route-participanteId="@Model.ParticipanteId" class="btn btn-warning">Editar</a> |
+    <a asp-action="Index" class="btn btn-secondary">Voltar à Lista</a>
+</div>
