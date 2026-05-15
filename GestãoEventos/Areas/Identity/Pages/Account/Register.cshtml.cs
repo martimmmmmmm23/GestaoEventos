@@ -5,6 +5,7 @@
 using GestãoEventos.Data;
 using GestãoEventos.Data.Classes;
 using GestãoEventos.Models;
+using GestãoEventos.ViewModel.Participantes;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -138,9 +139,12 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var participante = new Participante();
+                    
                     participante.Nome = user.NomeCompleto;
                     participante.Email = user.Email;
-                      
+                    _context.Add(participante);
+                    await _context.SaveChangesAsync();
+
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
