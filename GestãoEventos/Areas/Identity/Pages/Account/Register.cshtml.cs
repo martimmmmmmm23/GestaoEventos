@@ -36,17 +36,14 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
 
         private readonly GestaoEventosDbContext _context;
-        public RegisterModel(GestaoEventosDbContext context)
-        {
-            _context = context;
-        }
 
         public RegisterModel(
-            UserManager<ApplicationUser> userManager,
-            IUserStore<ApplicationUser> userStore,
-            SignInManager<ApplicationUser> signInManager,
-            ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+        UserManager<ApplicationUser> userManager,
+        IUserStore<ApplicationUser> userStore,
+        SignInManager<ApplicationUser> signInManager,
+        ILogger<RegisterModel> logger,
+        IEmailSender emailSender,
+        GestaoEventosDbContext context)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -54,6 +51,7 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _context = context;
         }
 
         /// <summary>
