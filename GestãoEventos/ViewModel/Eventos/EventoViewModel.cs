@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using GestãoEventos.Data.Classes;
 
 namespace GestãoEventos.ViewModel.Eventos
@@ -25,8 +26,14 @@ namespace GestãoEventos.ViewModel.Eventos
         [StringLength(500)]
         public string? Descricao { get; set; }
 
-        [Display(Name = "Detalhes")]
-        public string? Detalhes { get; set; }
+        [Display(Name = "Hora")]
+        [Required]
+        public TimeSpan Hora { get; set; }
+
+        [Display(Name = "Preço")]
+        [Required]
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal Preco { get; set; }
 
         public ICollection<Inscricao> Inscricoes { get; set; } = new List<Inscricao>();
     }
