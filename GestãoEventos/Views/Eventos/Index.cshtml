@@ -18,7 +18,9 @@
             <tr>
                 <th>Nome</th>
                 <th>Data</th>
+                <th>Hora</th>
                 <th>Local</th>
+                <th>Preço</th>
                 <th class="text-end">Ações</th>
             </tr>
         </thead>
@@ -29,7 +31,9 @@
                 <tr>
                     <td class="fw-bold">@item.Nome</td>
                     <td>@item.Data.ToString("dd/MM/yyyy")</td>
+                    @* <td>@item.Hora</td> *@
                     <td>@item.Local</td>
+                    @* <td>@item.Preço</td> *@
                     <td class="text-end">
                         <a asp-action="Edit" asp-route-id="@item.Id" class="mx-1" style="color: var(--primary-accent);">Editar</a> |
                         <a asp-action="Details" asp-route-id="@item.Id" class="mx-1" style="color: var(--primary-accent);">Detalhes</a> |
