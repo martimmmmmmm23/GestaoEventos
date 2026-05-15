@@ -72,38 +72,32 @@ namespace GestãoEventos.Controllers
         {
             if (ModelState.IsValid)
             {
+                var participante = await _context.Participantes
+                    .FirstOrDefaultAsync(p => p.Email == model.Email);
 
-                bool jaInscrito = await _context.Inscricoes
-                    .Include(i => i.Participante)
-                    .AnyAsync(i => i.EventoId == model.EventoId && i.Participante.Email == model.Email); // Verifica se já existe uma inscrição para o mesmo evento com o mesmo e-mail
-
-                if (jaInscrito)
+                if (participante == null)
                 {
+                    // 1. Mantemos a mensagem de erro normal
+                    ModelState.AddModelError("Email", "Participante não encontrado. Verifique o e-mail ou crie conta.");
 
-                    ModelState.AddModelError("Email", "Este e-mail já se encontra num registo neste evento.");
-
+                    // 2. NOVA LINHA: Enviamos um "sinal" para a View mostrar o link
+                    ViewBag.MostrarLinkRegisto = true;
 
                     model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
                     return View(model);
                 }
 
-                var participante = await _context.Participantes // Verifica se o participante já existe no banco de dados com base no e-mail fornecido. Se existir, ele reutiliza o registro existente; caso contrário, cria um novo participante.
-                    .FirstOrDefaultAsync(p => p.Email == model.Email);
+                bool jaInscrito = await _context.Inscricoes
+                    .AnyAsync(i => i.EventoId == model.EventoId && i.ParticipanteId == participante.Id);
 
-                if (participante == null) // Se o participante não existir, cria um novo registro
+                if (jaInscrito)
                 {
-
-                    participante = new Participante
-                    {
-                        Nome = model.Nome,
-                        Email = model.Email
-                    };
-                    _context.Participantes.Add(participante);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("Email", "Este e-mail já se encontra num registo neste evento.");
+                    model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
+                    return View(model);
                 }
 
-
-                var novaInscricao = new Inscricao // Cria uma nova inscrição associando o participante ao evento selecionado.
+                var novaInscricao = new Inscricao
                 {
                     EventoId = model.EventoId,
                     ParticipanteId = participante.Id
@@ -111,7 +105,6 @@ namespace GestãoEventos.Controllers
 
                 _context.Inscricoes.Add(novaInscricao);
                 await _context.SaveChangesAsync();
-
 
                 return RedirectToAction("Index", "Eventos");
             }
