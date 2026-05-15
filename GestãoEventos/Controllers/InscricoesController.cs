@@ -72,38 +72,32 @@ namespace GestãoEventos.Controllers
         {
             if (ModelState.IsValid)
             {
+                var participante = await _context.Participantes
+                    .FirstOrDefaultAsync(p => p.Email == model.Email);
 
-                bool jaInscrito = await _context.Inscricoes
-                    .Include(i => i.Participante)
-                    .AnyAsync(i => i.EventoId == model.EventoId && i.Participante.Email == model.Email); // Verifica se já existe uma inscrição para o mesmo evento com o mesmo e-mail
-
-                if (jaInscrito)
+                if (participante == null)
                 {
+                    // 1. Mantemos a mensagem de erro normal
+                    ModelState.AddModelError("Email", "Participante não encontrado. Verifique o e-mail ou crie conta.");
 
-                    ModelState.AddModelError("Email", "Este e-mail já se encontra num registo neste evento.");
-
+                    // 2. NOVA LINHA: Enviamos um "sinal" para a View mostrar o link
+                    ViewBag.MostrarLinkRegisto = true;
 
                     model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
                     return View(model);
                 }
 
-                var participante = await _context.Participantes // Verifica se o participante já existe no banco de dados com base no e-mail fornecido. Se existir, ele reutiliza o registro existente; caso contrário, cria um novo participante.
-                    .FirstOrDefaultAsync(p => p.Email == model.Email);
+                bool jaInscrito = await _context.Inscricoes
+                    .AnyAsync(i => i.EventoId == model.EventoId && i.ParticipanteId == participante.Id);
 
-                if (participante == null) // Se o participante não existir, cria um novo registro
+                if (jaInscrito)
                 {
-
-                    participante = new Participante
-                    {
-                        Nome = model.Nome,
-                        Email = model.Email
-                    };
-                    _context.Participantes.Add(participante);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("Email", "Este e-mail já se encontra num registo neste evento.");
+                    model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
+                    return View(model);
                 }
 
-
-                var novaInscricao = new Inscricao // Cria uma nova inscrição associando o participante ao evento selecionado.
+                var novaInscricao = new Inscricao
                 {
                     EventoId = model.EventoId,
                     ParticipanteId = participante.Id
@@ -111,7 +105,6 @@ namespace GestãoEventos.Controllers
 
                 _context.Inscricoes.Add(novaInscricao);
                 await _context.SaveChangesAsync();
-
 
                 return RedirectToAction("Index", "Eventos");
             }
@@ -153,20 +146,37 @@ namespace GestãoEventos.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int oldEventoId, int oldParticipanteId, [Bind("EventoId,ParticipanteId")] Inscricao inscricao)
         {
-            // Verificamos se os IDs do formulário correspondem aos que queríamos editar
-            if (oldEventoId != inscricao.EventoId || oldParticipanteId != inscricao.ParticipanteId)
+            if (oldEventoId == 0 || oldParticipanteId == 0) return NotFound(); // Verifica se os IDs antigos existem na base de dados, caso contrário retorna NotFound
+
+            if (inscricao.EventoId != oldEventoId || inscricao.ParticipanteId != oldParticipanteId) // Se o organizador mudou o evento ou participante, precisamos verificar se a nova combinação já existe para evitar insersoes duplicadas
             {
-                return NotFound();
+                if (InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId)) // Verifica se já existe uma inscrição com a nova combinação de evento e participante. Se existir, adiciona um erro ao ModelState
+                {
+                    ModelState.AddModelError("", "Este participante já está inscrito no evento selecionado.");
+
+                    ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
+                    ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
+                    return View(inscricao);
+                }
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(inscricao);
+                    var inscricaoAntiga = await _context.Inscricoes // Procura a inscrição antiga usando os IDs antigos para garantir que estamos a editar a inscrição correta
+                        .FirstOrDefaultAsync(i => i.EventoId == oldEventoId && i.ParticipanteId == oldParticipanteId);
+
+                    if (inscricaoAntiga != null)
+                    {
+                        _context.Inscricoes.Remove(inscricaoAntiga);// Se a inscrição antiga for encontrada, ela é removida do banco de dados e substituida por uma nova inscrição com os novos IDs de evento e participante. Isso é necessário porque a chave primária da tabela de inscrições é composta pelos IDs de evento e participante, e não podemos simplesmente atualizar esses campos sem remover a inscrição antiga primeiro.
+                        await _context.SaveChangesAsync();
+                    }
+
+                    _context.Inscricoes.Add(inscricao);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException) //
                 {
                     if (!InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId))
                     {
