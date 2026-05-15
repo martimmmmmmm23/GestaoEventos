@@ -153,20 +153,37 @@ namespace GestãoEventos.Controllers
         [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Edit(int oldEventoId, int oldParticipanteId, [Bind("EventoId,ParticipanteId")] Inscricao inscricao)
         {
-            // Verificamos se os IDs do formulário correspondem aos que queríamos editar
-            if (oldEventoId != inscricao.EventoId || oldParticipanteId != inscricao.ParticipanteId)
+            if (oldEventoId == 0 || oldParticipanteId == 0) return NotFound(); // Verifica se os IDs antigos existem na base de dados, caso contrário retorna NotFound
+
+            if (inscricao.EventoId != oldEventoId || inscricao.ParticipanteId != oldParticipanteId) // Se o organizador mudou o evento ou participante, precisamos verificar se a nova combinação já existe para evitar insersoes duplicadas
             {
-                return NotFound();
+                if (InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId)) // Verifica se já existe uma inscrição com a nova combinação de evento e participante. Se existir, adiciona um erro ao ModelState
+                {
+                    ModelState.AddModelError("", "Este participante já está inscrito no evento selecionado.");
+
+                    ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
+                    ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
+                    return View(inscricao);
+                }
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(inscricao);
+                    var inscricaoAntiga = await _context.Inscricoes // Procura a inscrição antiga usando os IDs antigos para garantir que estamos a editar a inscrição correta
+                        .FirstOrDefaultAsync(i => i.EventoId == oldEventoId && i.ParticipanteId == oldParticipanteId);
+
+                    if (inscricaoAntiga != null)
+                    {
+                        _context.Inscricoes.Remove(inscricaoAntiga);// Se a inscrição antiga for encontrada, ela é removida do banco de dados e substituida por uma nova inscrição com os novos IDs de evento e participante. Isso é necessário porque a chave primária da tabela de inscrições é composta pelos IDs de evento e participante, e não podemos simplesmente atualizar esses campos sem remover a inscrição antiga primeiro.
+                        await _context.SaveChangesAsync();
+                    }
+
+                    _context.Inscricoes.Add(inscricao);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException) //
                 {
                     if (!InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId))
                     {
@@ -187,8 +204,7 @@ namespace GestãoEventos.Controllers
             return _context.Inscricoes.Any(e => e.EventoId == eventoId && e.ParticipanteId == participanteId);
         }
 
-        // GET: Inscricoes/Delete/5
-        [Authorize(Roles = "Organizador")]
+        // GET: Inscricoes/Delete/5     
         public async Task<IActionResult> Delete(int? eventoId, int? participanteId)
         {
             if (eventoId == null || participanteId == null) return NotFound();
@@ -206,7 +222,6 @@ namespace GestãoEventos.Controllers
         // POST: Inscricoes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> DeleteConfirmed(int eventoId, int participanteId)
         {
             var inscricao = await _context.Inscricoes
