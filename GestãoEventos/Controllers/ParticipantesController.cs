@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 
 namespace GestãoEventos.Controllers
 {
@@ -47,33 +48,12 @@ namespace GestãoEventos.Controllers
             return View(participante);
         }
 
-        //// GET: Participantes/Create
-        //public IActionResult Create()
-        //{
-        //    return View();
-        //}
+        // GET: Participantes/Create
+        public IActionResult Create()
+        {
+            return RedirectToPage("/Account/Register", new { area = "Identity" });
+        }
 
-        //// POST: Participantes/Create
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create(ParticipanteViewModel model)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        // Convert ViewModel -> Entity
-        //        var participante = new Participante
-        //        {
-        //            Nome = model.Nome,
-        //            Email = model.Email
-        //        };
-
-        //        _context.Add(participante);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    return View(model);
-        //}
 
         // GET: Participantes/Edit/5
         [Authorize(Roles = "Admin")]
