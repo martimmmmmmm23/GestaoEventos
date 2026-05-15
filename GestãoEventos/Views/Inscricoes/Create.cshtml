@@ -20,9 +20,6 @@ else
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            @* Este campo hidden garante que o ID é enviado caso o evento já venha selecionado *@
-            <input type="hidden" asp-for="EventoId" />
-
             <div class="form-group mb-3">
                 <label asp-for="Nome" class="control-label"></label>
                 <input asp-for="Nome" class="form-control" placeholder="Introduza o seu nome completo" />
