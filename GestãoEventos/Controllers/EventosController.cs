@@ -33,7 +33,8 @@ namespace GestãoEventos.Controllers
                 return NotFound();
 
             var evento = await _context.Eventos
-                .FirstOrDefaultAsync(x => x.Id == id);
+                        .Include(e => e.Inscricoes)
+                        .FirstOrDefaultAsync(x => x.Id == id);
 
             if (evento == null)
                 return NotFound();
@@ -42,7 +43,10 @@ namespace GestãoEventos.Controllers
             {
                 Nome = evento.Nome,
                 Data = evento.Data,
-                Local = evento.Local
+                Local = evento.Local,
+                Image = evento.Image,
+                Descricao = evento.Descricao,
+                Detalhes = evento.Detalhes
             };
 
             return View(model);
@@ -66,7 +70,10 @@ namespace GestãoEventos.Controllers
             {
                 Nome = model.Nome,
                 Data = model.Data,
-                Local = model.Local
+                Local = model.Local,
+                Image = model.Image,
+                Descricao = model.Descricao,
+                Detalhes = model.Detalhes
             };
 
             _context.Add(evento);
@@ -90,7 +97,10 @@ namespace GestãoEventos.Controllers
             {
                 Nome = evento.Nome,
                 Data = evento.Data,
-                Local = evento.Local
+                Local = evento.Local,
+                Image = evento.Image,
+                Descricao = evento.Descricao,
+                Detalhes = evento.Detalhes
             };
 
             ViewBag.Id = id; // porque não usas Id na ViewModel
@@ -117,6 +127,9 @@ namespace GestãoEventos.Controllers
             evento.Nome = model.Nome;
             evento.Data = model.Data;
             evento.Local = model.Local;
+            evento.Image = model.Image;
+            evento.Descricao = model.Descricao;
+            evento.Detalhes = model.Detalhes;
 
             await _context.SaveChangesAsync();
 
