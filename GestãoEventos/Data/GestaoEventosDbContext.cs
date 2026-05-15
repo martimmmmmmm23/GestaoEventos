@@ -1,8 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using GestãoEventos.Data.Classes;
+﻿using GestãoEventos.Data.Classes;
 using GestãoEventos.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-﻿using GestãoEventos.Data.Classes;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestãoEventos.Data
@@ -24,15 +22,27 @@ namespace GestãoEventos.Data
 
             modelBuilder.Entity<Inscricao>()
                 .HasKey(i => new { i.EventoId, i.ParticipanteId });
+
+            modelBuilder.Entity<Inscricao>()
+                .HasOne(i => i.Evento)
+                .WithMany(e => e.Inscricoes)
+                .HasForeignKey(i => i.EventoId)
+                .OnDelete(DeleteBehavior.Cascade); // Se apagar o Evento, apaga as Inscrições dele
+
+            modelBuilder.Entity<Inscricao>()
+                .HasOne(i => i.Participante)
+                .WithMany(p => p.Inscricoes)
+                .HasForeignKey(i => i.ParticipanteId)
+                .OnDelete(DeleteBehavior.Cascade); // Se apagar o Participante, apaga as Inscrições dele
         }
-
-        ///--- CONFIGURAÇÃO DA RELAÇÃO MUITOS-PARA-MUITOS (M:N) ---
-        // 1. Definimos 'EventoId' e 'ParticipanteId' como uma Chave Primária Composta
-        // 2. O EF Core identifica automaticamente as Chaves Estrangeiras (FKs) porque:
-        //    - A classe 'Inscricao' tem as propriedades de objeto e ID de Evento e Participante
-        //    - As classes 'Evento' e 'Participante' têm listas (ICollection) de 'Inscricao'
-        // 3. Conclusão do EFcore: Isto é claramente uma tabela de ligação (Muitos-para-Muitos).
-        // Vou criar as chaves estrangeiras (Foreign Keys) na base de dados automaticamente!"
-
     }
+
+    ///--- CONFIGURAÇÃO DA RELAÇÃO MUITOS-PARA-MUITOS (M:N) ---
+    // 1. Definimos 'EventoId' e 'ParticipanteId' como uma Chave Primária Composta
+    // 2. O EF Core identifica automaticamente as Chaves Estrangeiras (FKs) porque:
+    //    - A classe 'Inscricao' tem as propriedades de objeto e ID de Evento e Participante
+    //    - As classes 'Evento' e 'Participante' têm listas (ICollection) de 'Inscricao'
+    // 3. Conclusão do EFcore: Isto é claramente uma tabela de ligação (Muitos-para-Muitos).
+    // Vou criar as chaves estrangeiras (Foreign Keys) na base de dados automaticamente!"
+
 }
