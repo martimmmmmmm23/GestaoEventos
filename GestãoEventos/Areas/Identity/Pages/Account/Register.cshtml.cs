@@ -5,6 +5,7 @@
 using GestãoEventos.Data;
 using GestãoEventos.Data.Classes;
 using GestãoEventos.Models;
+using GestãoEventos.ViewModel.Participantes;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -35,17 +36,14 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
 
         private readonly GestaoEventosDbContext _context;
-        public RegisterModel(GestaoEventosDbContext context)
-        {
-            _context = context;
-        }
 
         public RegisterModel(
-            UserManager<ApplicationUser> userManager,
-            IUserStore<ApplicationUser> userStore,
-            SignInManager<ApplicationUser> signInManager,
-            ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+        UserManager<ApplicationUser> userManager,
+        IUserStore<ApplicationUser> userStore,
+        SignInManager<ApplicationUser> signInManager,
+        ILogger<RegisterModel> logger,
+        IEmailSender emailSender,
+        GestaoEventosDbContext context)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -53,6 +51,7 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _context = context;
         }
 
         /// <summary>
@@ -138,9 +137,12 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var participante = new Participante();
+                    
                     participante.Nome = user.NomeCompleto;
                     participante.Email = user.Email;
-                      
+                    _context.Add(participante);
+                    await _context.SaveChangesAsync();
+
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(

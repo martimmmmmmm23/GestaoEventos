@@ -47,7 +47,8 @@ namespace GestãoEventos.Controllers
                 Local = evento.Local,
                 Image = evento.Image,
                 Descricao = evento.Descricao,
-                Detalhes = evento.Detalhes,
+                Hora = evento.Hora,
+                Preco = evento.Preco,
                 Inscricoes = evento.Inscricoes
             };
 
@@ -76,7 +77,8 @@ namespace GestãoEventos.Controllers
                 Data = model.Data,
                 Local = model.Local,
                 Descricao = model.Descricao,
-                Detalhes = model.Detalhes
+                Hora = model.Hora,
+                Preco = model.Preco
             };
 
             if (model.ImageFile != null)
@@ -128,10 +130,11 @@ namespace GestãoEventos.Controllers
                 Local = evento.Local,
                 Image = evento.Image,
                 Descricao = evento.Descricao,
-                Detalhes = evento.Detalhes
+                Hora = evento.Hora,
+                Preco = evento.Preco
             };
 
-            ViewBag.Id = id; // porque não usas Id na ViewModel
+            ViewBag.Id = id;
 
             return View(model);
         }
@@ -157,7 +160,8 @@ namespace GestãoEventos.Controllers
             evento.Data = model.Data;
             evento.Local = model.Local;
             evento.Descricao = model.Descricao;
-            evento.Detalhes = model.Detalhes;
+            evento.Hora = model.Hora;
+            evento.Preco = model.Preco;
 
             if (model.ImageFile != null)
             {

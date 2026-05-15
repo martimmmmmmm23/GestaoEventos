@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
 namespace GestãoEventos.Data.Classes
 {
     public class Evento
     {
         public int Id { get; set; }
-
-        
 
         [Required]
         [StringLength(100)]
@@ -30,8 +29,15 @@ namespace GestãoEventos.Data.Classes
         [StringLength(500)]
         public string? Descricao { get; set; }
 
-        [Display(Name = "Detalhes")]
-        public string? Detalhes { get; set; }
+        [Display(Name = "Hora")]
+        [Required]
+        public TimeSpan Hora { get; set; }
+
+        [Display(Name = "Preço")]
+        [Column(TypeName = "decimal(10,2)")]
+        [Required]
+        public decimal Preco { get; set; }
+
         public ICollection<Inscricao> Inscricoes { get; set; } = new List<Inscricao>();
     }
 }
