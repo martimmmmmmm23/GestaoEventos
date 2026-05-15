@@ -21,10 +21,23 @@ namespace GestãoEventos.Controllers
         [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Index()
         {
-            var inscricoes = await _context.Inscricoes // Include é usado para carregar os dados relacionados, ou seja, os detalhes do evento e do participante associados a cada inscrição. Isso evita a necessidade de consultas adicionais ao banco de dados para obter essas informações quando a view for renderizada.
+            // 1. Guardar o email numa variável ANTES da consulta à base de dados
+            var userEmail = User.Identity?.Name;
+
+            // Prepara a consulta base
+            var query = _context.Inscricoes
                 .Include(i => i.Evento)
                 .Include(i => i.Participante)
-                .ToListAsync();
+                .AsQueryable();
+
+            // NOVA REGRA: Se NÃO for Organizador, filtra as inscrições
+            if (!User.IsInRole("Organizador"))
+            {
+                // 2. Usar a variável no filtro e garantir que o Participante existe mesmo
+                query = query.Where(i => i.Participante != null && i.Participante.Email == userEmail);
+            }
+
+            var inscricoes = await query.ToListAsync();
 
             return View(inscricoes);
         }
@@ -40,6 +53,11 @@ namespace GestãoEventos.Controllers
                 .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId); //
 
             if (inscricao == null) return NotFound();
+
+            if (!User.IsInRole("Admin") && inscricao.Participante.Email != User.Identity.Name)
+            {
+                return Forbid(); // Dá erro 403 - Acesso Negado
+            }
 
             return View(inscricao);
         }

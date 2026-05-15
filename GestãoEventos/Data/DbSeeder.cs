@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using GestãoEventos.Data.Classes;
 using GestãoEventos.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace GestãoEventos.Data
 {
@@ -11,30 +12,70 @@ namespace GestãoEventos.Data
             var userManager = service.GetService<UserManager<ApplicationUser>>();
             var roleManager = service.GetService<RoleManager<IdentityRole>>();
 
+            // ADICIONADO: Precisamos do Contexto para gravar na tabela Participantes
+            var context = service.GetRequiredService<GestaoEventosDbContext>();
+
             // Criar Roles se não existirem
             await roleManager.CreateAsync(new IdentityRole("Organizador"));
             await roleManager.CreateAsync(new IdentityRole("Utilizador"));
 
-            // Criar um Admin se não existir
-            var adminEmail = "admin@portal.pt";
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-            if (adminUser == null)
+            // 2. CRIAR O ADMIN 
+            if (await userManager.FindByEmailAsync("admin@portal.pt") == null)
             {
-                adminUser = new ApplicationUser
+                var admin = new ApplicationUser
                 {
-                    UserName = adminEmail,
-                    Email = adminEmail,
+                    UserName = "admin",
+                    Email = "admin@portal.pt",
                     NomeCompleto = "Administrador do Sistema",
                     EmailConfirmed = true
                 };
 
-                // Criar o Admin com uma password forte
-                await userManager.CreateAsync(adminUser, "Admin123!");
+                var result = await userManager.CreateAsync(admin, "Admin123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(admin, "Organizador");
 
-                // Atribuir Role Admin
-                await userManager.AddToRoleAsync(adminUser, "Organizador");
+                    // GUARDAR NA TABELA PARTICIPANTES
+                    context.Participantes.Add(new Participante { Nome = admin.NomeCompleto, Email = admin.Email });
+                }
             }
+            // 3. CRIAR CONTAS DE TESTE (PARTICIPANTES)
+            // Utilizador: João
+            if (await userManager.FindByEmailAsync("joao@participante.pt") == null)
+            {
+                var joao = new ApplicationUser
+                {
+                    UserName = "joao@participante.pt",
+                    Email = "joao@participante.pt",
+                    NomeCompleto = "João Silva",
+                    EmailConfirmed = true
+                };
+                var result = await userManager.CreateAsync(joao, "Teste123!");
+                if (result.Succeeded)
+                {
+                    context.Participantes.Add(new Participante { Nome = joao.NomeCompleto, Email = joao.Email });
+                }
+            }
+
+            // Utilizador: Maria
+            if (await userManager.FindByEmailAsync("maria@participante.pt") == null)
+            {
+                var maria = new ApplicationUser
+                {
+                    UserName = "maria@participante.pt",
+                    Email = "maria@participante.pt",
+                    NomeCompleto = "Maria Santos",
+                    EmailConfirmed = true
+                };
+                var result = await userManager.CreateAsync(maria, "Teste123!");
+                if (result.Succeeded)
+                {
+                    context.Participantes.Add(new Participante { Nome = maria.NomeCompleto, Email = maria.Email });
+                }
+            }
+
+            // GUARDA TUDO NA BASE DE DADOS
+            await context.SaveChangesAsync();
         }
     }
 }
