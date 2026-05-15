@@ -83,8 +83,8 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "O campo Email é obrigatório.")]
+            [EmailAddress(ErrorMessage = "Por favor, introduza um endereço de email válido.")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
@@ -92,10 +92,10 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Required(ErrorMessage = "O campo Palavra-passe é obrigatório.")]
+            [StringLength(100, ErrorMessage = "A {0} deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Display(Name = "Palavra-passe")]
             public string Password { get; set; }
 
             /// <summary>
@@ -103,11 +103,11 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "Confirmar palavra-passe")]
+            [Compare("Password", ErrorMessage = "A palavra-passe e a confirmação não coincidem.")]
             public string ConfirmPassword { get; set; }
             
-            [Required]
+            [Required(ErrorMessage = "O campo Nome Completo é obrigatório.")]
             [Display(Name = "Nome Completo")]
             public string NomeCompleto { get; set; }
         }
@@ -122,55 +122,64 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
+                user.NomeCompleto = Input.NomeCompleto;
 
+                //Cria os dados de Autenticação (Identity)
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    _logger.LogInformation("Utilizador criou uma conta com password.");
 
-                    var userId = await _userManager.GetUserIdAsync(user);
+                    //Grava o Participante na Base de Dados
                     var participante = new Participante();
-                    
-                    participante.Nome = user.NomeCompleto;
-                    participante.Email = user.Email;
+
+                    participante.Nome = Input.NomeCompleto;
+                    participante.Email = Input.Email;
+
                     _context.Add(participante);
                     await _context.SaveChangesAsync();
 
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
-
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
-                    }
-                    else
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
-                    }
+                    // 3. Faz o Login Imediato e manda o utilizador para a página inicial
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return LocalRedirect(returnUrl);
                 }
+
+                //Se a pass for fraca ou o email já existir dá erro
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    string mensagemTraduzida = error.Description;
+
+                    // Traduz o erro de email/utilizador já duplicado
+                    if (error.Code == "DuplicateUserName" || error.Code == "DuplicateEmail")
+                    {
+                        mensagemTraduzida = "Este endereço de email já se encontra registado.";
+                    }
+                    // Traduz erro de password sem letras maiúsculas
+                    else if (error.Code == "PasswordRequiresUpper")
+                    {
+                        mensagemTraduzida = "A palavra-passe deve conter pelo menos uma letra maiúscula ('A'-'Z').";
+                    }
+                    // Traduz erro de password sem algarismos
+                    else if (error.Code == "PasswordRequiresDigit")
+                    {
+                        mensagemTraduzida = "A palavra-passe deve conter pelo menos um algarismo ('0'-'9').";
+                    }
+                    // Traduz erro de password sem caracteres especiais (ex: !, @, #)
+                    else if (error.Code == "PasswordRequiresNonAlphanumeric")
+                    {
+                        mensagemTraduzida = "A palavra-passe deve conter pelo menos um carácter especial (ex: !, ?, @, #).";
+                    }
+                    ModelState.AddModelError(string.Empty, mensagemTraduzida);
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
 
@@ -182,9 +191,8 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
             }
             catch
             {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                    $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
+                throw new InvalidOperationException($"Não foi possível criar uma instância de '{nameof(ApplicationUser)}'. " +
+                    $"Garanta que a classe não é abstrata e possui um construtor sem parâmetros.");
             }
         }
 
@@ -192,7 +200,7 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
         {
             if (!_userManager.SupportsUserEmail)
             {
-                throw new NotSupportedException("The default UI requires a user store with email support.");
+                throw new NotSupportedException("O sistema de autenticação configurado requer um suporte de armazenamento que aceite emails.");
             }
             return (IUserEmailStore<ApplicationUser>)_userStore;
         }
