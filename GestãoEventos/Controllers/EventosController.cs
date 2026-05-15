@@ -47,7 +47,8 @@ namespace GestãoEventos.Controllers
                 Local = evento.Local,
                 Image = evento.Image,
                 Descricao = evento.Descricao,
-                Detalhes = evento.Detalhes
+                Detalhes = evento.Detalhes,
+                Inscricoes = evento.Inscricoes
             };
 
             return View(model);
@@ -74,10 +75,33 @@ namespace GestãoEventos.Controllers
                 Nome = model.Nome,
                 Data = model.Data,
                 Local = model.Local,
-                Image = model.Image,
                 Descricao = model.Descricao,
                 Detalhes = model.Detalhes
             };
+
+            if (model.ImageFile != null)
+            {
+                if (model.ImageFile.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("ImageFile", "A imagem não pode exceder 5MB.");
+                    return View(model);
+                }
+
+                var fileName = Guid.NewGuid().ToString() +
+                               Path.GetExtension(model.ImageFile.FileName);
+
+                var path = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot/images",
+                    fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+
+                evento.Image = "/images/" + fileName;
+            }
 
             _context.Add(evento);
             await _context.SaveChangesAsync();
@@ -132,9 +156,33 @@ namespace GestãoEventos.Controllers
             evento.Nome = model.Nome;
             evento.Data = model.Data;
             evento.Local = model.Local;
-            evento.Image = model.Image;
             evento.Descricao = model.Descricao;
             evento.Detalhes = model.Detalhes;
+
+            if (model.ImageFile != null)
+            {
+                if (model.ImageFile.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("ImageFile", "A imagem não pode exceder 5MB.");
+                    ViewBag.Id = id;
+                    return View(model);
+                }
+
+                var fileName = Guid.NewGuid().ToString() +
+                               Path.GetExtension(model.ImageFile.FileName);
+
+                var path = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot/images",
+                    fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+
+                evento.Image = "/images/" + fileName;
+            }
 
             await _context.SaveChangesAsync();
 
