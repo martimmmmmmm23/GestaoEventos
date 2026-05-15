@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace GestãoEventos.Controllers
 {
-    public class ParticipanteController : Controller
+    public class ParticipantesController : Controller
     {
         private readonly GestaoEventosDbContext _context;
 
-        public ParticipanteController(GestaoEventosDbContext context)
+        public ParticipantesController(GestaoEventosDbContext context)
         {
             _context = context;
         }
@@ -46,33 +46,33 @@ namespace GestãoEventos.Controllers
             return View(participante);
         }
 
-        // GET: Participantes/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+        //// GET: Participantes/Create
+        //public IActionResult Create()
+        //{
+        //    return View();
+        //}
 
-        // POST: Participantes/Create
+        //// POST: Participantes/Create
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ParticipanteViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                // Convert ViewModel -> Entity
-                var participante = new Participante
-                {
-                    Nome = model.Nome,
-                    Email = model.Email
-                };
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create(ParticipanteViewModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        // Convert ViewModel -> Entity
+        //        var participante = new Participante
+        //        {
+        //            Nome = model.Nome,
+        //            Email = model.Email
+        //        };
 
-                _context.Add(participante);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(model);
-        }
+        //        _context.Add(participante);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(model);
+        //}
 
         // GET: Participantes/Edit/5
         public async Task<IActionResult> Edit(int? id)
