@@ -18,15 +18,14 @@ namespace GestãoEventos.Controllers
     public class ParticipantesController : Controller
     {
         private readonly GestaoEventosDbContext _context;
-
-        //para gerir os users do ASP.NET Core Identity
         private readonly UserManager<ApplicationUser> _userManager;
-        public ParticipantesController(
-                    GestaoEventosDbContext context,
-                    UserManager<ApplicationUser> userManager)
+        private readonly SignInManager<ApplicationUser> _signInManager;
+
+        public ParticipantesController(GestaoEventosDbContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _context = context;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         // GET: Participantes
@@ -63,7 +62,7 @@ namespace GestãoEventos.Controllers
 
 
         // GET: Participantes/Edit/5
-        [Authorize(Roles = "Organizador")]
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -71,90 +70,118 @@ namespace GestãoEventos.Controllers
             var participante = await _context.Participantes.FindAsync(id);
             if (participante == null) return NotFound();
 
-            ViewBag.SelectedId = id;
-            var viewModel = new ParticipanteViewModel
+            // Bloqueia se o utilizador não for Organizador e tentar ver outro perfil
+            if (!User.IsInRole("Organizador") && participante.Email != User.Identity.Name)
             {
-                Nome = participante.Nome,
-                Email = participante.Email,
-                ConfirmarEmail = participante.Email // Pre-fill so validation doesn't fail immediately
+                return Forbid();
+            }
+
+            var model = new EditarPerfilViewModel
+            {
+                Id = participante.Id,
+                NomeAtual = participante.Nome,
+                EmailAtual = participante.Email,
+                NovoNome = participante.Nome,
+                NovoEmail = participante.Email,
+                ConfirmarNovoEmail = participante.Email // Preenchido para passar na validação automática
             };
 
-            return View(viewModel);
+            return View(model);
         }
 
         // POST: Participantes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Organizador")]
-        public async Task<IActionResult> Edit(int id, ParticipanteViewModel model)
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, EditarPerfilViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            if (id != model.Id) return NotFound();
 
-            // Buscar participante
             var participante = await _context.Participantes.FindAsync(id);
+            if (participante == null) return NotFound();
 
-            if (participante == null)
-                return NotFound();
+            if (!User.IsInRole("Organizador") && participante.Email != User.Identity.Name) return Forbid();
 
-            // Guardar email antigo (IMPORTANTE)
-            var oldEmail = participante.Email;
+            var userLogin = await _userManager.FindByEmailAsync(participante.Email);
 
-            // Atualizar tabela Participantes
-            participante.Nome = model.Nome;
-            participante.Email = model.Email;
-
-            // Procurar user no AspNetUsers
-            var user = await _userManager.FindByEmailAsync(oldEmail);
-
-            if (user != null)
+            if (ModelState.IsValid)
             {
-                // Atualizar email e username
-                user.Email = model.Email;
-                user.UserName = model.Email;
+                bool precisaAtualizarLogin = false;
 
-                // Atualizar nome (AspNetUsers)
-                user.NomeCompleto = model.Nome;
-
-                var result = await _userManager.UpdateAsync(user);
-
-                if (!result.Succeeded)
+                // Alterar Nome
+                if (!string.IsNullOrEmpty(model.NovoNome))
                 {
-                    foreach (var error in result.Errors)
+                    participante.Nome = model.NovoNome;
+                    if (userLogin != null) userLogin.NomeCompleto = model.NovoNome;
+                }
+
+                // Alterar Email
+                if (model.NovoEmail != participante.Email)
+                {
+                    if (userLogin != null)
                     {
-                        ModelState.AddModelError("", error.Description);
+                        await _userManager.SetEmailAsync(userLogin, model.NovoEmail);
+                        await _userManager.SetUserNameAsync(userLogin, model.NovoEmail);
+                        precisaAtualizarLogin = true;
+                    }
+                    participante.Email = model.NovoEmail;
+                }
+
+                // Alterar Password
+                if (!string.IsNullOrEmpty(model.NovaPassword))
+                {
+                    if (string.IsNullOrEmpty(model.PasswordAtual))
+                    {
+                        ModelState.AddModelError("PasswordAtual", "Para alterar a password, precisa de inserir a password atual.");
+                        return RepopularView(model, participante);
                     }
 
-                    return View(model);
+                    var resultPass = await _userManager.ChangePasswordAsync(userLogin, model.PasswordAtual, model.NovaPassword);
+                    if (!resultPass.Succeeded)
+                    {
+                        foreach (var erro in resultPass.Errors) ModelState.AddModelError("", erro.Description);
+                        return RepopularView(model, participante);
+                    }
+                    precisaAtualizarLogin = true;
                 }
-            }
-            else
-            {
-                ModelState.AddModelError("", "Utilizador do AspNetUsers não encontrado.");
-                return View(model);
+                _context.Update(participante);
+                await _context.SaveChangesAsync();
+
+                if (userLogin != null) await _userManager.UpdateAsync(userLogin);
+
+                // Se mudou email ou password, renova o cookie de login para o utilizador não ser desconectado
+                if (precisaAtualizarLogin && userLogin != null)
+                {
+                    await _signInManager.RefreshSignInAsync(userLogin);
+                }
+
+                return RedirectToAction("Index", "Home");
             }
 
-            // Guardar alterações na tabela Participantes
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+            return RepopularView(model, participante);
+        }
+        private IActionResult RepopularView(EditarPerfilViewModel model, Participante p)
+        {
+            model.NomeAtual = p.Nome;
+            model.EmailAtual = p.Email;
+            return View(model);
         }
 
         // GET: Participantes/Delete/5
-        [Authorize(Roles = "Organizador")]
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
+            if (id == null) return NotFound();
+
+            var participante = await _context.Participantes.FirstOrDefaultAsync(m => m.Id == id);
+            if (participante == null) return NotFound();
+
+            // SEGURANÇA: Só o Organizador ou o próprio dono da conta podem ver esta página
+            if (!User.IsInRole("Organizador") && participante.Email != User.Identity.Name)
             {
-                return NotFound();
+                return Forbid();
             }
 
-            var participante = await _context.Participantes
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (participante == null)
-            {
-                return NotFound();
-            }
             ViewBag.SelectedId = id;
             return View(participante);
         }
@@ -162,23 +189,25 @@ namespace GestãoEventos.Controllers
         // POST: Participantes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Organizador")]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             // Procurar participante
-            var participante = await _context.Participantes
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var participante = await _context.Participantes.FirstOrDefaultAsync(p => p.Id == id);
+            if (participante == null) return NotFound();
 
-            if (participante == null)
+            //Prevenir ataques via URL
+            if (!User.IsInRole("Organizador") && participante.Email != User.Identity.Name)
             {
-                return NotFound();
+                return Forbid();
             }
 
-            // Procurar utilizador no AspNetUsers pelo email
+            // Procurar utilizador no Identity
             var user = await _userManager.FindByEmailAsync(participante.Email);
 
             // Apagar participante
             _context.Participantes.Remove(participante);
+            await _context.SaveChangesAsync(); // É mais seguro gravar o Participante primeiro
 
             // Apagar utilizador Identity
             if (user != null)
@@ -186,8 +215,14 @@ namespace GestãoEventos.Controllers
                 await _userManager.DeleteAsync(user);
             }
 
-            await _context.SaveChangesAsync();
+            // Se foi o próprio utilizador a apagar a sua conta: Faz logout e vai para a Home
+            if (participante.Email == User.Identity?.Name)
+            {
+                await _signInManager.SignOutAsync();
+                return RedirectToAction("Index", "Home");
+            }
 
+            // Se foi o Organizador a apagar a conta de outra pessoa: Volta à lista
             return RedirectToAction(nameof(Index));
         }
     }
