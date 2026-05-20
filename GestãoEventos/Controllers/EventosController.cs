@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using GestãoEventos.Data;
+﻿using GestãoEventos.Data;
 using GestãoEventos.Data.Classes;
 using GestãoEventos.ViewModel.Eventos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace GestãoEventos.Controllers
 {
@@ -34,11 +35,14 @@ namespace GestãoEventos.Controllers
                 return NotFound();
 
             var evento = await _context.Eventos
-                        .Include(e => e.Inscricoes)
-                        .FirstOrDefaultAsync(x => x.Id == id);
+                .Include(e => e.Inscricoes)
+                    .ThenInclude(i => i.Participante)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (evento == null)
                 return NotFound();
+
+            ViewBag.EventoId = evento.Id;
 
             var model = new EventoViewModel
             {
@@ -224,6 +228,56 @@ namespace GestãoEventos.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> ExportParticipants(int id)
+        {
+            var evento = await _context.Eventos
+                .Include(e => e.Inscricoes)
+                    .ThenInclude(i => i.Participante)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (evento == null)
+                return NotFound();
+
+            var csv = new StringBuilder();
+
+       
+            csv.AppendLine($"Evento: {evento.Nome}");
+            csv.AppendLine($"Data: {evento.Data:dd/MM/yyyy}");
+            csv.AppendLine("");
+
+           
+            csv.AppendLine("Nome,Email");
+
+           
+            foreach (var insc in evento.Inscricoes)
+            {
+                csv.AppendLine($"{insc.Participante.Nome},{insc.Participante.Email}");
+            }
+
+            var fileName = $"evento_{SanitizeFileName(evento.Nome)}_participantes.csv";
+
+            return File(
+                Encoding.UTF8.GetBytes(csv.ToString()),
+                "text/csv",
+                fileName
+            );
+        }
+
+        private string SanitizeFileName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "evento";
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+
+            foreach (var c in invalidChars)
+            {
+                name = name.Replace(c, '_');
+            }
+
+            return name.Replace(" ", "_");
         }
     }
 }
