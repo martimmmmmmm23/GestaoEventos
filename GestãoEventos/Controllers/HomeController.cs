@@ -1,4 +1,5 @@
 using GestãoEventos.Data;
+using GestãoEventos.Data.Classes;
 using GestãoEventos.Models;
 using GestãoEventos.ViewModel.Eventos;
 using Microsoft.AspNetCore.Mvc;
@@ -24,20 +25,9 @@ namespace GestãoEventos.Controllers
                 .Include(e => e.Inscricoes)
                 .ThenInclude(e => e.Participante)
                 .ToListAsync();
-            var model = eventosDaDb.Select(e => new EventoViewModel
-            {
-                Nome = e.Nome,
-                Data = e.Data,
-                Local = e.Local,
-                Lugares = e.Lugares,
-                Inscricoes = e.Inscricoes,
-                Hora = e.Hora,
-                Preco = e.Preco,
-                Image = e.Image
 
-            }).ToList();
 
-            return View(model);
+            return View(eventosDaDb);
         }
 
         public IActionResult Privacy()
