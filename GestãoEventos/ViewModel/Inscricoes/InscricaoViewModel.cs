@@ -5,13 +5,13 @@ namespace GestãoEventos.ViewModel.Inscricoes
 {
     public class InscricaoViewModel
     {
-        [Required(ErrorMessage = "O nome é obrigatório.")]
+        //[Required(ErrorMessage = "O nome é obrigatório.")]
         [Display(Name = "Nome Completo")]
-        public string Nome { get; set; }
+        public string? Nome { get; set; }
 
         [Required(ErrorMessage = "O email é obrigatório.")]
         [EmailAddress(ErrorMessage = "O email deve ser válido.")] // Validação de email em relacao a um padrao ex: abc@domain.com
-        [Display(Name = "Email address")]
+        [Display(Name = "Endereço de Email")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "A seleção do evento é obrigatória.")]
