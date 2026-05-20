@@ -1,6 +1,8 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using GestãoEventos.Data
+@using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@inject GestaoEventosDbContext Context
 
 <!DOCTYPE html>
 <html lang="en">
@@ -19,7 +21,7 @@
             <div class="container-fluid">
                 <!-- Nome principal no canto superior esquerdo e logotipo -->
                 <a class="navbar-brand font-weight-bold d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/images/logotipo.png" alt="Logotipo Gestão de Eventos" height="40" class="me-3 rounded" />
+                    <img src="~/images/imageLogotipo.png" alt="Logotipo Gestão de Eventos" height="40" class="me-3 rounded" />
                 </a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -29,11 +31,12 @@
 
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1 ms-3">
-                        <li class="nav-item mx-1">
-                            <a class="nav-link fs-6" asp-area="" asp-controller="Eventos" asp-action="Index">Eventos</a>
-                        </li>
+                        
                         @if (SignInManager.IsSignedIn(User) && User.IsInRole("Organizador"))
                             {
+                            <li class="nav-item mx-1">
+                                <a class="nav-link fs-6" asp-area="" asp-controller="Eventos" asp-action="Index">Eventos</a>
+                            </li>
                             <div class="vr opacity-25 my-2" style="height: 30px;"></div>
                             <li class="nav-item mx-1">
                                 <a class="nav-link fs-6" asp-area="" asp-controller="Participantes" asp-action="Index">Participantes</a>
@@ -58,9 +61,24 @@
                         {
                             // O UTILIZADOR ESTÁ LOGADO
                             <li class="nav-item">
-                                <a class="nav-link" title="Gerir Conta">
-                                    Olá, @User.Identity?.Name!
-                                </a>
+                                @if (SignInManager.IsSignedIn(User))
+                                {
+                                    // Vai buscar o utilizador do Identity
+                                    var currentUser = await UserManager.GetUserAsync(User);
+                                    var userEmail = currentUser?.Email;
+                                    var nomeAExibir = currentUser?.NomeCompleto ?? User.Identity?.Name;
+
+                                    // Vai buscar o ID do Participante correspondente
+                                    var participante = Context.Participantes.FirstOrDefault(p => p.Email == userEmail);
+
+                                    if (participante != null)
+                                    {
+                                        // Se o participante existir na base de dados, o link vai para o Edit do MVC normal
+                                        <a class="nav-link fs-6" asp-area="" asp-controller="Participantes" asp-action="Edit" asp-route-id="@participante.Id" title="Editar Perfil">
+                                            Olá, @nomeAExibir!
+                                        </a>
+                                    }
+                                }
                             </li>
                             <li class="nav-item">
                                 <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">

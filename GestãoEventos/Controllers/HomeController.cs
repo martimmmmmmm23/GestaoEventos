@@ -30,7 +30,10 @@ namespace GestãoEventos.Controllers
                 Data = e.Data,
                 Local = e.Local,
                 Lugares = e.Lugares,
-                Inscricoes = e.Inscricoes
+                Inscricoes = e.Inscricoes,
+                Hora = e.Hora,
+                Preco = e.Preco,
+                Image = e.Image
 
             }).ToList();
 
