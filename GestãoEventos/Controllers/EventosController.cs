@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using GestãoEventos.Data;
+﻿using GestãoEventos.Data;
 using GestãoEventos.Data.Classes;
 using GestãoEventos.ViewModel.Eventos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace GestãoEventos.Controllers
 {
@@ -41,6 +42,8 @@ namespace GestãoEventos.Controllers
             if (evento == null)
                 return NotFound();
 
+            ViewBag.EventoId = evento.Id;
+
             var model = new EventoViewModel
             {
                 Nome = evento.Nome,
@@ -50,7 +53,8 @@ namespace GestãoEventos.Controllers
                 Descricao = evento.Descricao,
                 Hora = evento.Hora,
                 Preco = evento.Preco,
-                Inscricoes = evento.Inscricoes
+                Inscricoes = evento.Inscricoes,
+                Lugares = evento.Lugares
             };
 
             return View(model);
@@ -90,7 +94,8 @@ namespace GestãoEventos.Controllers
                 Local = model.Local,
                 Descricao = model.Descricao,
                 Hora = model.Hora,
-                Preco = model.Preco
+                Preco = model.Preco,
+                Lugares = model.Lugares
             };
 
             if (model.ImageFile != null)
@@ -143,7 +148,8 @@ namespace GestãoEventos.Controllers
                 Image = evento.Image,
                 Descricao = evento.Descricao,
                 Hora = evento.Hora,
-                Preco = evento.Preco
+                Preco = evento.Preco,
+                Lugares = evento.Lugares
             };
 
             ViewBag.Id = id;
@@ -203,7 +209,7 @@ namespace GestãoEventos.Controllers
 
                 var path = Path.Combine(
                     Directory.GetCurrentDirectory(),
-                    "wwwroot/images",
+                    "wwwroot/images/",
                     fileName);
 
                 using (var stream = new FileStream(path, FileMode.Create))
@@ -250,6 +256,56 @@ namespace GestãoEventos.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> ExportParticipants(int id)
+        {
+            var evento = await _context.Eventos
+                .Include(e => e.Inscricoes)
+                    .ThenInclude(i => i.Participante)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (evento == null)
+                return NotFound();
+
+            var csv = new StringBuilder();
+
+       
+            csv.AppendLine($"Evento: {evento.Nome}");
+            csv.AppendLine($"Data: {evento.Data:dd/MM/yyyy}");
+            csv.AppendLine("");
+
+           
+            csv.AppendLine("Nome,Email");
+
+           
+            foreach (var insc in evento.Inscricoes)
+            {
+                csv.AppendLine($"{insc.Participante.Nome},{insc.Participante.Email}");
+            }
+
+            var fileName = $"evento_{SanitizeFileName(evento.Nome)}_participantes.csv";
+
+            return File(
+                Encoding.UTF8.GetBytes(csv.ToString()),
+                "text/csv",
+                fileName
+            );
+        }
+
+        private string SanitizeFileName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "evento";
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+
+            foreach (var c in invalidChars)
+            {
+                name = name.Replace(c, '_');
+            }
+
+            return name.Replace(" ", "_");
         }
     }
 }

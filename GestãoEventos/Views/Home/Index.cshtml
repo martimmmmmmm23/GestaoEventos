@@ -2,12 +2,12 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-@model IEnumerable<GestãoEventos.ViewModel.Eventos.EventoViewModel>
+@model IEnumerable<GestãoEventos.ViewModel.Eventos.EventoViewModel> //listar vários eventos 
 @{
     ViewData["Title"] = "Bem-vindo";
     var agora = DateTime.Now;
 
-    var eventosFuturos = Model?.Where(e => e.Data >= agora).OrderBy(e => e.Data).ToList()
+    var eventosFuturos = Model?.Where(e => e.Data >= agora).OrderBy(e => e.Data).ToList() 
                         ?? new List<GestãoEventos.ViewModel.Eventos.EventoViewModel>();
 
     var eventosPassados = Model?.Where(e => e.Data < agora).OrderByDescending(e => e.Data).ToList()
@@ -45,17 +45,49 @@
                 {
                     <div class="col-md-4">
                         <div class="card h-100 cartao-evento bg-theme-surface border-0 shadow-sm">
-                            <div class="img-placeholder text-center py-4 rounded-top" style="background-color: var(--primary-accent); color: var(--bg-surface);">
-                                <i class="bi bi-calendar-check fs-1"></i>
+                            <div class="img-placeholder text-center py-2 rounded-top" style="background-color: var(--primary-accent); color: var(--bg-surface);">
+                                <label class="btn btn-lg btn-primary w-100 fw-bold">@item.Nome</label>
                             </div>
+                            
                             <div class="card-body">
-                                <span class="badge bg-success bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Confirmado</span>
-                                <div class="fw-bold small text-uppercase mb-1" style="color: var(--primary-accent);">@item.Data.ToString("dd MMM, yyyy")</div>
-                                <h5 class="card-title text-theme-main fw-bold">@item.Nome</h5>
+                                @* Nr Lugares *@
+                                @if(item.Lugares == null)
+                                {
+                                    <span class="badge bg-success bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Ilimitado</span>
+                                }
+                                else if(item.Lugares > item.Inscricoes.Count())
+                                {
+                                    <span class="badge bg-info bg-opacity-75 mb-2 px-3 py-2 rounded-pill">@(item.Lugares - item.Inscricoes.Count()) Disponíveis</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Esgotado</span>
+                                }
+                                <div class="d-flex justify-content-between align-items-center fw-bold small text-uppercase mb-2">
+                                    <span>@item.Data.ToString("dd MMM yyyy") | @item.Hora.ToString(@"hh\:mm")</span>
+                                    <span class="fs-6">
+                                        @if (item.Preco == 0)
+                                        {
+                                            <span class="badge bg-success text-white rounded-pill px-3 py-1 fw-bold" style="letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(25, 135, 84, 0.4);">GRÁTIS</span>
+                                        }
+                                        else
+                                        {
+                                            @item.Preco.ToString("0.00 €")
+                                        }
+                                    </span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(item.Image))
+                                {
+                                    <img src="@item.Image" alt="Cartaz de @item.Nome" class="img-fluid w-100 rounded mb-3" style="height: 200px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <img src="~/images/imageDefault.png" alt="Logotipo Acontece" class="img-fluid w-100 rounded mb-3" style="height: 200px; object-fit: cover;" />
+                                }
                                 <p class="card-text text-theme-muted small"><i class="bi bi-geo-alt"></i> @item.Local</p>
                             </div>
                             <div class="card-footer bg-transparent border-0 pb-3 pt-0">
-                                <a asp-action="Index" class="btn btn-sm btn-primary w-100 py-2 fw-bold">Ver Detalhes</a>
+                                <a asp-action="Index" class="btn btn-sm btn-primary w-100 py-2 fw-bold">Inscreva-se</a>
                             </div>
                         </div>
                     </div>
