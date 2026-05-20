@@ -21,7 +21,7 @@ namespace GestãoEventos.Controllers
         public async Task<IActionResult> Index()
         {
             // 1. Guardar o email numa variável ANTES da consulta à base de dados
-            var userEmail = User.Identity?.Name;
+            var userEmail = User.Identity?.Name; 
 
             // Prepara a consulta base
             var query = _context.Inscricoes
@@ -74,12 +74,25 @@ namespace GestãoEventos.Controllers
                 {
                     model.EventoId = evento.Id;
                     model.NomeEvento = evento.Nome;
+
                 }
             }
-            model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId); //preenche a lista de eventos disponíveis para o dropdown
+
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                model.Email = User.Identity.Name; // Guarda o email do utilizador logado no ViewModel
+            }
+
+            model.EventosDisponiveis = new SelectList(
+                _context.Eventos.Where(e => e.Data >= DateTime.Now),
+                "Id",
+                "Nome",
+                model.EventoId
+            );
 
             return View(model);
         }
+
 
         // POST: Inscricoes/Create
 
@@ -89,6 +102,20 @@ namespace GestãoEventos.Controllers
         {
             if (ModelState.IsValid)
             {
+                var evento = await _context.Eventos.FindAsync(model.EventoId);
+
+                if (evento == null || evento.Data < DateTime.Now)
+                {
+                    ModelState.AddModelError("EventoId", "O evento selecionado não existe ou já ocorreu.");
+                    model.EventosDisponiveis = new SelectList(
+                         _context.Eventos.Where(e => e.Data >= DateTime.Now),
+                         "Id",
+                         "Nome",
+                         model.EventoId
+                    );
+                    return View(model);
+                }
+
                 var participante = await _context.Participantes
                     .FirstOrDefaultAsync(p => p.Email == model.Email);
 
@@ -100,7 +127,12 @@ namespace GestãoEventos.Controllers
                     // 2. NOVA LINHA: Enviamos um "sinal" para a View mostrar o link
                     ViewBag.MostrarLinkRegisto = true;
 
-                    model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
+                    model.EventosDisponiveis = new SelectList(
+                          _context.Eventos.Where(e => e.Data >= DateTime.Now),
+                          "Id",
+                          "Nome",
+                          model.EventoId
+                     );
                     return View(model);
                 }
 
@@ -110,7 +142,12 @@ namespace GestãoEventos.Controllers
                 if (jaInscrito)
                 {
                     ModelState.AddModelError("Email", "Este e-mail já se encontra num registo neste evento.");
-                    model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
+                    model.EventosDisponiveis = new SelectList(
+                         _context.Eventos.Where(e => e.Data >= DateTime.Now),
+                         "Id",
+                         "Nome",
+                         model.EventoId
+                    );
                     return View(model);
                 }
 
@@ -126,7 +163,12 @@ namespace GestãoEventos.Controllers
                 return RedirectToAction("Index", "Eventos");
             }
 
-            model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
+            model.EventosDisponiveis = new SelectList(
+                          _context.Eventos.Where(e => e.Data >= DateTime.Now),
+                          "Id",
+                          "Nome",
+                          model.EventoId
+                     );
             return View(model);
         }
 
@@ -150,8 +192,13 @@ namespace GestãoEventos.Controllers
                 return NotFound();
             }
 
-            // Preparamos as listas para as dropdowns, caso o organizador queira mudar o evento ou participante
-            ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
+            // Preparamos as listas para as dropdowns, caso o organizador queira mudar o evento ou participante, mostramos os eventos futuros OU o evento que já está selecionado naquela inscrição específica (mesmo que seja passado).
+            ViewData["EventoId"] = new SelectList(
+                _context.Eventos.Where(e => e.Data >= DateTime.Now || e.Id == inscricao.EventoId),
+                "Id",
+                "Nome",
+                inscricao.EventoId
+            );
             ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
 
             return View(inscricao);
@@ -171,7 +218,12 @@ namespace GestãoEventos.Controllers
                 {
                     ModelState.AddModelError("", "Este participante já está inscrito no evento selecionado.");
 
-                    ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
+                    ViewData["EventoId"] = new SelectList(
+                        _context.Eventos.Where(e => e.Data >= DateTime.Now || e.Id == inscricao.EventoId),
+                        "Id",
+                        "Nome",
+                        inscricao.EventoId
+                    );
                     ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
                     return View(inscricao);
                 }
@@ -193,7 +245,7 @@ namespace GestãoEventos.Controllers
                     _context.Inscricoes.Add(inscricao);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException) //
+                catch (DbUpdateConcurrencyException) 
                 {
                     if (!InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId))
                     {
@@ -204,7 +256,12 @@ namespace GestãoEventos.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
+            ViewData["EventoId"] = new SelectList(
+                _context.Eventos.Where(e => e.Data >= DateTime.Now || e.Id == inscricao.EventoId),
+                "Id",
+                "Nome",
+                inscricao.EventoId
+            );
             ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
             return View(inscricao);
         }
