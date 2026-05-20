@@ -38,6 +38,9 @@ namespace GestãoEventos.Data.Classes
         [Required]
         public decimal Preco { get; set; }
 
+        [Display(Name = "Total de Lugares")]
+        public int? Lugares { get; set; } // null indica que não há limite de lugares
+
         public ICollection<Inscricao> Inscricoes { get; set; } = new List<Inscricao>();
     }
 }

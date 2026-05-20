@@ -49,7 +49,8 @@ namespace GestãoEventos.Controllers
                 Descricao = evento.Descricao,
                 Hora = evento.Hora,
                 Preco = evento.Preco,
-                Inscricoes = evento.Inscricoes
+                Inscricoes = evento.Inscricoes,
+                Lugares = evento.Lugares
             };
 
             return View(model);
@@ -78,7 +79,8 @@ namespace GestãoEventos.Controllers
                 Local = model.Local,
                 Descricao = model.Descricao,
                 Hora = model.Hora,
-                Preco = model.Preco
+                Preco = model.Preco,
+                Lugares = model.Lugares
             };
 
             if (model.ImageFile != null)
@@ -131,7 +133,8 @@ namespace GestãoEventos.Controllers
                 Image = evento.Image,
                 Descricao = evento.Descricao,
                 Hora = evento.Hora,
-                Preco = evento.Preco
+                Preco = evento.Preco,
+                Lugares = evento.Lugares
             };
 
             ViewBag.Id = id;

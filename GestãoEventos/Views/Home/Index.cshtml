@@ -50,6 +50,19 @@
                             </div>
                             
                             <div class="card-body">
+                                @* Nr Lugares *@
+                                @if(item.Lugares == null)
+                                {
+                                    <span class="badge bg-success bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Ilimitado</span>
+                                }
+                                else if(item.Lugares > item.Inscricoes.Count())
+                                {
+                                    <span class="badge bg-info bg-opacity-75 mb-2 px-3 py-2 rounded-pill">@(item.Lugares - item.Inscricoes.Count()) Disponíveis</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Esgotado</span>
+                                }
                                 <div class="d-flex justify-content-between align-items-center fw-bold small text-uppercase mb-2">
                                     <span>@item.Data.ToString("dd MMM yyyy") | @item.Hora.ToString(@"hh\:mm")</span>
                                     <span class="fs-6">
