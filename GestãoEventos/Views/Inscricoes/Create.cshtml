@@ -1,62 +1,112 @@
 ﻿@model GestãoEventos.ViewModel.Inscricoes.InscricaoViewModel
 
 @{
-    ViewData["Title"] = "Inscrições";
+    ViewData["Title"] = "Criar";
 }
 
-@* Mostra um título diferente consoante o evento já venha pré-selecionado ou não *@
-@if (!string.IsNullOrEmpty(Model.NomeEvento))
-{
-    <h2>Inscrição no Evento: <span class="text-primary">@Model.NomeEvento</span></h2>
-}
-else
-{
-    <h1 class="text-theme-main fw-bold my-4">@ViewData["Title"]</h1>
-    <h4 class="text-theme-muted">Inscrições</h4>
-    <hr class="border-color" />
-}
-<div class="row">
-    <div class="col-md-6">
-        <div class="bg-theme-surface p-4 rounded-3 shadow-sm">
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="EventoId" />
+<h1 class="text-theme-main fw-bold my-4">@ViewData["Title"]</h1>
+<h4 class="text-theme-muted">Nova Inscrição</h4>
+<hr class="border-color" />
 
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" placeholder="exemplo@email.com" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+<form asp-action="Create" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                @* BLOCO NOVO: Só aparece se o Controller não encontrar o email *@
-                @if (ViewBag.MostrarLinkRegisto == true)
-                {
-                    <div class="mt-2 p-3 border border-warning rounded bg-light">
-                        <strong>Gostaria de criar conta?</strong>
-                        <p class="text-muted mb-2 small">Parece que este e-mail ainda não está registado. Pode criar uma conta agora ou corrigir o e-mail acima.</p>
+    <div class="row align-items-stretch">
+        <div class="col-md-6">
+            <div class="bg-theme-surface p-4 rounded-3 shadow-sm h-100">
+                <div class="form-group mb-3">
+                    <label asp-for="Email" class="control-label"></label>
+                    <input asp-for="Email" class="form-control" placeholder="exemplo@email.com" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
 
-                        @* ATENÇÃO: Ajusta este link para a tua página de registo real *@
-                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-sm btn-outline-primary">Criar Nova Conta</a>
-                    </div>
-                }
-
+                    @if (ViewBag.MostrarLinkRegisto == true)
+                    {
+                        <div class="mt-2 p-3 border border-warning rounded bg-light">
+                            <strong>Gostaria de criar conta?</strong>
+                            <p class="text-muted mb-2 small">Parece que este e-mail ainda não está registado. Pode criar uma conta agora ou corrigir o e-mail acima.</p>
+                            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-sm btn-outline-primary">Criar Nova Conta</a>
+                        </div>
+                    }
+                </div>
                 <div class="form-group mb-3">
                     <label asp-for="EventoId" class="control-label">Selecionar Evento</label>
-                    <select asp-for="EventoId" class="form-control" asp-items="Model.EventosDisponiveis">
+                    <select asp-for="EventoId" id="DropdownEvento" class="form-control" asp-items="Model.EventosDisponiveis">
                         <option value="">-- Escolha um evento --</option>
                     </select>
                     <span asp-validation-for="EventoId" class="text-danger"></span>
                 </div>
 
-                <div class="form-group mt-3">
-                    <input type="submit" value="Confirmar Inscrição" class="btn btn-success" />
-                    <a asp-action="Index" class="btn btn-secondary ms-2">Voltar à Lista</a>
+                <div class="form-group mt-4">
+                    <input type="submit" value="Confirmar" class="btn btn-primary px-5 rounded-pill" />
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill ms-2">Voltar à Lista</a>
+                </div>  
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="bg-theme-surface p-4 rounded-3 shadow-sm h-100">
+                <div id="ContentDetalhesEvento">
+                    <p class="text-muted text-center">Selecione um evento para ver os detalhes.</p>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
-</div>
+</form>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        // 1. Espera que o documento carregue e escuta alterações no Dropdown
+        document.getElementById('DropdownEvento').addEventListener('change', function () {
+
+            // 2. Guarda o ID do evento selecionado (ex: "1", "2" ou "" se for a opção padrão)
+            const eventoId = this.value;
+            const container = document.getElementById('ContentDetalhesEvento');
+
+            // 3. Se o utilizador selecionou a opção vazia "-- Escolha um evento --"
+            if (!eventoId) {
+                container.innerHTML = `
+                    <div class="d-flex h-100 align-items-center justify-content-center text-muted text-center">
+                        <div>
+                            <p class="mb-0">Selecione um evento para ver os detalhes informativos.</p>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            // 4. Mostra um Spinner de Loading (efeito visual de carregamento do Bootstrap)
+            container.innerHTML = `
+                <div class="d-flex h-100 align-items-center justify-content-center">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">A carregar...</span>
+                    </div>
+                </div>`;
+
+            // 5. Faz a chamada AJAX (Fetch) ao teu Controller
+            // Nota: Altera 'Inscricoes' se o teu Controller tiver outro nome (ex: 'Eventos')
+            fetch(`/Inscricoes/ObterDetalhesEvento?id=${eventoId}`)
+                .then(response => {
+                    // Se o servidor responder com erro (ex: 404 ou 500)
+                    if (!response.ok) {
+                        throw new Error('Não foi possível encontrar os dados do evento.');
+                    }
+                    // Transforma a resposta em texto puro (que é o HTML da nossa Partial View)
+                    return response.text();
+                })
+                .then(htmlDeResposta => {
+                    // 6. Injeta o HTML recebido diretamente dentro do painel da direita
+                    container.innerHTML = htmlDeResposta;
+                })
+                .catch(error => {
+                    // Trata qualquer erro de rede ou de servidor
+                    console.error('Erro na requisição AJAX:', error);
+                    container.innerHTML = `
+                        <div class="alert alert-danger m-3 small text-center" role="alert">
+                            Erro ao carregar os detalhes do evento. Por favor, tente novamente.
+                        </div>`;
+                });
+        });
+    </script>
 }

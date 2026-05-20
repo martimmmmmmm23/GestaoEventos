@@ -15,9 +15,9 @@
     <table class="table">
         <thead class="text-theme-main">
             <tr>
-                <th>Nome</th>
-                <th>Data</th>
-                <th>Local</th>
+                <th>Nome do Evento</th>
+                <th>Nome do Participante</th>
+                <th>Email do Participante</th>
                 <th class="text-end">Ações</th>
             </tr>
         </thead>
@@ -27,8 +27,8 @@
             {
                 <tr>
                     <td class="fw-bold">@item.Evento.Nome</td>
-                    <td class="fw-bold">@item..Participante.Nome</td>
-                    <td class="fw-bold">item.Participante.Email</td>
+                    <td class="fw-bold">@item.Participante.Nome</td>
+                    <td class="fw-bold">@item.Participante.Email</td>
                     <td class="text-end">
                         <a asp-action="Edit" asp-route-eventoId="@item.EventoId" asp-route-participanteId="@item.ParticipanteId" class="mx-1" style="color: var(--primary-accent);">Editar</a> |
                         <a asp-action="Details" asp-route-eventoId="@item.EventoId" asp-route-participanteId="@item.ParticipanteId" style="color: var(--primary-accent);">Detalhes</a> |
