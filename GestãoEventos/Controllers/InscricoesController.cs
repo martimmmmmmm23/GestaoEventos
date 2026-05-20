@@ -114,24 +114,31 @@ namespace GestãoEventos.Controllers
             return View(model);
         }
 
-            // POST: Inscricoes/Create
-            [HttpPost]
+        private void CarregarDadosEventos(InscricaoViewModel model)
+        {
+            model.EventosDisponiveis = new SelectList(
+                _context.Eventos.Where(e => e.Data >= DateTime.Now),
+                "Id",
+                "Nome",
+                model.EventoId
+            );
+        }
+
+        // POST: Inscricoes/Create
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(InscricaoViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var evento = await _context.Eventos.FindAsync(model.EventoId);
+                var evento = await _context.Eventos
+                    .Include(e => e.Inscricoes)
+                    .FirstOrDefaultAsync(e => e.Id == model.EventoId);
 
                 if (evento == null || evento.Data < DateTime.Now)
                 {
                     ModelState.AddModelError("EventoId", "O evento selecionado não existe ou já ocorreu.");
-                    model.EventosDisponiveis = new SelectList(
-                         _context.Eventos.Where(e => e.Data >= DateTime.Now),
-                         "Id",
-                         "Nome",
-                         model.EventoId
-                    );
+                    CarregarDadosEventos(model);
                     return View(model);
                 }
 
@@ -145,13 +152,15 @@ namespace GestãoEventos.Controllers
 
                     // 2. NOVA LINHA: Enviamos um "sinal" para a View mostrar o link
                     ViewBag.MostrarLinkRegisto = true;
+                    CarregarDadosEventos(model);
+                    return View(model);
+                }
 
-                    model.EventosDisponiveis = new SelectList(
-                          _context.Eventos.Where(e => e.Data >= DateTime.Now),
-                          "Id",
-                          "Nome",
-                          model.EventoId
-                     );
+
+                if (evento.Inscricoes.Count >= evento.Lugares)
+                {
+                    ModelState.AddModelError("", "Não existem lugares disponíveis para este evento.");
+                    CarregarDadosEventos(model);
                     return View(model);
                 }
 
@@ -161,12 +170,7 @@ namespace GestãoEventos.Controllers
                 if (jaInscrito)
                 {
                     ModelState.AddModelError("Email", "Este e-mail já se encontra num registo neste evento.");
-                    model.EventosDisponiveis = new SelectList(
-                         _context.Eventos.Where(e => e.Data >= DateTime.Now),
-                         "Id",
-                         "Nome",
-                         model.EventoId
-                    );
+                    CarregarDadosEventos(model);
                     return View(model);
                 }
 
@@ -181,12 +185,7 @@ namespace GestãoEventos.Controllers
                 return RedirectToAction("Index", "Eventos");
             }
 
-            model.EventosDisponiveis = new SelectList(
-                          _context.Eventos.Where(e => e.Data >= DateTime.Now),
-                          "Id",
-                          "Nome",
-                          model.EventoId
-                     );
+            CarregarDadosEventos(model);
             return View(model);
         }
 
