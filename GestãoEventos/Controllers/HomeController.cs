@@ -20,12 +20,17 @@ namespace GestãoEventos.Controllers
 
         public async Task<IActionResult> Index()
         {
+            //Vai buscar os eventos à bd
             var eventosDaDb = await _context.Eventos.ToListAsync();
+            //converte para a viewModel
             var model = eventosDaDb.Select(e => new EventoViewModel
             {
                 Nome = e.Nome,
                 Data = e.Data,
-                Local = e.Local
+                Local = e.Local,
+                Hora = e.Hora,
+                Preco = e.Preco,
+                Image = e.Image
 
             }).ToList();
 
