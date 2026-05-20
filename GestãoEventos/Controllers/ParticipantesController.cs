@@ -1,15 +1,17 @@
 ﻿using GestãoEventos.Data;
 using GestãoEventos.Data.Classes;
+using GestãoEventos.Models;
 using GestãoEventos.ViewModel.Participantes;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 
 namespace GestãoEventos.Controllers
 {
@@ -17,9 +19,14 @@ namespace GestãoEventos.Controllers
     {
         private readonly GestaoEventosDbContext _context;
 
-        public ParticipantesController(GestaoEventosDbContext context)
+        //para gerir os users do ASP.NET Core Identity
+        private readonly UserManager<ApplicationUser> _userManager;
+        public ParticipantesController(
+                    GestaoEventosDbContext context,
+                    UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Participantes
@@ -81,29 +88,56 @@ namespace GestãoEventos.Controllers
         [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Edit(int id, ParticipanteViewModel model)
         {
-            if (!(_context.Participantes.Select(x => x.Id).Contains(id))) return NotFound();
+            if (!ModelState.IsValid)
+                return View(model);
 
-            if (ModelState.IsValid)
+            // Buscar participante
+            var participante = await _context.Participantes.FindAsync(id);
+
+            if (participante == null)
+                return NotFound();
+
+            // Guardar email antigo (IMPORTANTE)
+            var oldEmail = participante.Email;
+
+            // Atualizar tabela Participantes
+            participante.Nome = model.Nome;
+            participante.Email = model.Email;
+
+            // Procurar user no AspNetUsers
+            var user = await _userManager.FindByEmailAsync(oldEmail);
+
+            if (user != null)
             {
-                try
-                {
-                    var participante = await _context.Participantes.FindAsync(id);
-                    if (participante == null) return NotFound();
+                // Atualizar email e username
+                user.Email = model.Email;
+                user.UserName = model.Email;
 
-                    participante.Nome = model.Nome;
-                    participante.Email = model.Email;
+                // Atualizar nome (AspNetUsers)
+                user.NomeCompleto = model.Nome;
 
-                    _context.Update(participante);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
                 {
-                    if (!_context.Participantes.Any(e => e.Id == id)) return NotFound();
-                    else throw;
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+
+                    return View(model);
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(model);
+            else
+            {
+                ModelState.AddModelError("", "Utilizador do AspNetUsers não encontrado.");
+                return View(model);
+            }
+
+            // Guardar alterações na tabela Participantes
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Participantes/Delete/5
@@ -131,13 +165,29 @@ namespace GestãoEventos.Controllers
         [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var participante = await _context.Participantes.FindAsync(id);
-            if (participante != null)
+            // Procurar participante
+            var participante = await _context.Participantes
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (participante == null)
             {
-                _context.Participantes.Remove(participante);
+                return NotFound();
+            }
+
+            // Procurar utilizador no AspNetUsers pelo email
+            var user = await _userManager.FindByEmailAsync(participante.Email);
+
+            // Apagar participante
+            _context.Participantes.Remove(participante);
+
+            // Apagar utilizador Identity
+            if (user != null)
+            {
+                await _userManager.DeleteAsync(user);
             }
 
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
     }
