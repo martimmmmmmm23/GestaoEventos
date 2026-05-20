@@ -1,0 +1,120 @@
+﻿@model GestãoEventos.ViewModel.Participantes.EditarPerfilViewModel
+
+@{
+    ViewData["Title"] = "Editar Perfil";
+}
+
+<h1 class="text-theme-main fw-bold my-4">@ViewData["Title"]</h1>
+<h4 class="text-theme-muted">Participante</h4>
+<hr class="border-color" />
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="bg-theme-surface p-4 rounded-3 shadow-sm">
+
+            <div id="zonaLeitura">
+                <div class="mb-3">
+                    <span class="text-theme-main fw-bold">Nome:</span>
+                    <span class="fs-5 ms-2">@Model.NomeAtual</span>
+                </div>
+                <div class="mb-3">
+                    <span class="text-theme-main fw-bold">Email:</span>
+                    <span class="fs-5 ms-2">@Model.EmailAtual</span>
+                </div>
+                <div class="mb-4">
+                    <span class="text-theme-main fw-bold">Palavra-passe:</span>
+                    <span class="fs-5 ms-2">********</span>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <button type="button" class="btn btn-primary px-4 rounded-pill" onclick="mostrarFormulario()">
+                            Alterar Dados
+                        </button>
+                        @if (User.IsInRole("Organizador"))
+                        {
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill ms-2">Voltar à Lista</a>
+                        }
+                    </div>
+
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger rounded-pill px-4">
+                        Eliminar Conta
+                    </a>
+                </div>
+            </div>
+
+            <div id="zonaEdicao" style="display: none;">
+                <h5 class="mb-4 text-theme-muted">Modifique os dados que deseja alterar:</h5>
+
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="form-group mb-3">
+                        <label asp-for="NovoNome" class="control-label text-theme-main fw-bold mb-1"></label>
+                        <input asp-for="NovoNome" class="form-control" />
+                        <span asp-validation-for="NovoNome" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="NovoEmail" class="control-label text-theme-main fw-bold mb-1"></label>
+                        <input asp-for="NovoEmail" class="form-control" />
+                        <span asp-validation-for="NovoEmail" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label asp-for="ConfirmarNovoEmail" class="control-label text-theme-main fw-bold mb-1"></label>
+                        <input asp-for="ConfirmarNovoEmail" class="form-control" />
+                        <span asp-validation-for="ConfirmarNovoEmail" class="text-danger"></span>
+                    </div>
+
+                    <hr class="border-color" />
+
+                    <div class="form-group mb-3">
+                        <label asp-for="PasswordAtual" class="control-label text-theme-main fw-bold mb-1"></label>
+                        <input asp-for="PasswordAtual" class="form-control" placeholder="Insira a atual se quiser definir uma nova" />
+                        <span asp-validation-for="PasswordAtual" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="NovaPassword" class="control-label text-theme-main fw-bold mb-1"></label>
+                        <input asp-for="NovaPassword" class="form-control" placeholder="Deixe em branco se não quiser mudar" />
+                        <span asp-validation-for="NovaPassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label asp-for="ConfirmarNovaPassword" class="control-label text-theme-main fw-bold mb-1"></label>
+                        <input asp-for="ConfirmarNovaPassword" class="form-control" placeholder="Confirme a nova password" />
+                        <span asp-validation-for="ConfirmarNovaPassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-primary px-4 rounded-pill">Guardar alterações</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill ms-2" onclick="esconderFormulario()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function mostrarFormulario() {
+            document.getElementById('zonaLeitura').style.display = 'none';
+            document.getElementById('zonaEdicao').style.display = 'block';
+        }
+
+        function esconderFormulario() {
+            document.getElementById('zonaEdicao').style.display = 'none';
+            document.getElementById('zonaLeitura').style.display = 'block';
+        }
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+                @:mostrarFormulario();
+        }
+    </script>
+}

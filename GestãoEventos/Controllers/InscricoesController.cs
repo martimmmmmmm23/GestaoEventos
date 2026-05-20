@@ -147,16 +147,16 @@ namespace GestãoEventos.Controllers
                     return View(model);
                 }
 
-                var evento = await _context.Eventos
-                    .Include(e => e.Inscricoes)
-                    .FirstOrDefaultAsync(e => e.Id == model.EventoId);
+                //var evento = await _context.Eventos
+                //    .Include(e => e.Inscricoes)
+                //    .FirstOrDefaultAsync(e => e.Id == model.EventoId);
 
-                    model.EventosDisponiveis = new SelectList(
-                          _context.Eventos.Where(e => e.Data >= DateTime.Now),
-                          "Id",
-                          "Nome",
-                          model.EventoId
-                     );
+                //    model.EventosDisponiveis = new SelectList(
+                //          _context.Eventos.Where(e => e.Data >= DateTime.Now),
+                //          "Id",
+                //          "Nome",
+                //          model.EventoId
+                //     );
                 if (evento == null)
                     return NotFound();
 
