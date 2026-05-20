@@ -20,12 +20,17 @@ namespace GestãoEventos.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var eventosDaDb = await _context.Eventos.ToListAsync();
+            var eventosDaDb = await _context.Eventos
+                .Include(e => e.Inscricoes)
+                .ThenInclude(e => e.Participante)
+                .ToListAsync();
             var model = eventosDaDb.Select(e => new EventoViewModel
             {
                 Nome = e.Nome,
                 Data = e.Data,
-                Local = e.Local
+                Local = e.Local,
+                Lugares = e.Lugares,
+                Inscricoes = e.Inscricoes
 
             }).ToList();
 

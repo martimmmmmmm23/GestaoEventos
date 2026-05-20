@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GestãoEventos.Data.Classes;
 
@@ -34,6 +35,9 @@ namespace GestãoEventos.ViewModel.Eventos
         [Required]
         [Column(TypeName = "decimal(10,2)")]
         public decimal Preco { get; set; }
+
+        [Display(Name = "Total de Lugares")]
+        public int? Lugares { get; set; } // null indica que não há limite de lugares
 
         public ICollection<Inscricao> Inscricoes { get; set; } = new List<Inscricao>();
     }

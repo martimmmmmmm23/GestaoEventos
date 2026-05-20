@@ -49,7 +49,19 @@
                                 <i class="bi bi-calendar-check fs-1"></i>
                             </div>
                             <div class="card-body">
-                                <span class="badge bg-success bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Confirmado</span>
+                                @* Nr Lugares *@
+                                @if(item.Lugares == null)
+                                {
+                                    <span class="badge bg-success bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Ilimitado</span>
+                                }
+                                else if(item.Lugares > item.Inscricoes.Count())
+                                {
+                                    <span class="badge bg-info bg-opacity-75 mb-2 px-3 py-2 rounded-pill">@(item.Lugares - item.Inscricoes.Count()) Disponíveis</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Esgotado</span>
+                                }
                                 <div class="fw-bold small text-uppercase mb-1" style="color: var(--primary-accent);">@item.Data.ToString("dd MMM, yyyy")</div>
                                 <h5 class="card-title text-theme-main fw-bold">@item.Nome</h5>
                                 <p class="card-text text-theme-muted small"><i class="bi bi-geo-alt"></i> @item.Local</p>
