@@ -35,9 +35,9 @@ namespace GestãoEventos.Controllers
                 return NotFound();
 
             var evento = await _context.Eventos
-                .Include(e => e.Inscricoes)
-                    .ThenInclude(i => i.Participante)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                        .Include(e => e.Inscricoes)
+                        .ThenInclude(e => e.Participante)
+                        .FirstOrDefaultAsync(x => x.Id == id);
 
             if (evento == null)
                 return NotFound();
@@ -75,6 +75,17 @@ namespace GestãoEventos.Controllers
         {
             if (!ModelState.IsValid)
                 return View(model);
+
+            bool localOcupado = await _context.Eventos.AnyAsync(e =>
+                e.Data == model.Data &&
+                e.Hora == model.Hora &&
+                e.Local == model.Local);
+
+            if (localOcupado)
+            {
+                ModelState.AddModelError(string.Empty, "Conflito de agenda: Já existe um evento marcado para este Local, nessa Data e Hora.");
+                return View(model);
+            }
 
             var evento = new Evento
             {
@@ -152,10 +163,24 @@ namespace GestãoEventos.Controllers
         [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Edit(int id, EventoViewModel model)
         {
+          
             var evento = await _context.Eventos.FindAsync(id);
 
             if (evento == null)
                 return NotFound();
+
+            bool localOcupado = await _context.Eventos.AnyAsync(e =>
+              e.Id != id &&
+              e.Data == model.Data &&
+              e.Hora == model.Hora &&
+              e.Local == model.Local);
+
+            if (localOcupado)
+            {
+                ModelState.AddModelError(string.Empty, "Conflito de agenda: Já existe outro evento marcado para este Local, nessa Data e Hora.");
+                ViewBag.Id = id;
+                return View(model);
+            }
 
             if (!ModelState.IsValid)
             {
