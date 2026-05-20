@@ -140,11 +140,16 @@ namespace GestãoEventos.Controllers
 
                 if (participante == null)
                 {
-                    // 1. Mantemos a mensagem de erro normal
                     ModelState.AddModelError("Email", "Participante não encontrado. Verifique o e-mail ou crie conta.");
 
-                    // 2. NOVA LINHA: Enviamos um "sinal" para a View mostrar o link
                     ViewBag.MostrarLinkRegisto = true;
+                    model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
+                    return View(model);
+                }
+
+                var evento = await _context.Eventos
+                    .Include(e => e.Inscricoes)
+                    .FirstOrDefaultAsync(e => e.Id == model.EventoId);
 
                     model.EventosDisponiveis = new SelectList(
                           _context.Eventos.Where(e => e.Data >= DateTime.Now),
@@ -152,9 +157,17 @@ namespace GestãoEventos.Controllers
                           "Nome",
                           model.EventoId
                      );
+                if (evento == null)
+                    return NotFound();
+
+                if (evento.Inscricoes.Count >= evento.Lugares)
+                {
+                    ModelState.AddModelError("", "Não existem lugares disponíveis para este evento.");
+                    model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
                     return View(model);
                 }
 
+                // já inscrito
                 bool jaInscrito = await _context.Inscricoes
                     .AnyAsync(i => i.EventoId == model.EventoId && i.ParticipanteId == participante.Id);
 
@@ -170,11 +183,13 @@ namespace GestãoEventos.Controllers
                     return View(model);
                 }
 
+                // criar inscrição
                 var novaInscricao = new Inscricao
                 {
                     EventoId = model.EventoId,
                     ParticipanteId = participante.Id
                 };
+
                 _context.Inscricoes.Add(novaInscricao);
                 await _context.SaveChangesAsync();
 

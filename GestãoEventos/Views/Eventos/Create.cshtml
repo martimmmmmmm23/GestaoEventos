@@ -40,6 +40,14 @@
                 </div>
 
                 <div class="form-group mb-3">
+                    <label asp-for="Lugares" class="control-label text-theme-main fw-bold mb-1"></label>
+                    <div class="input-group">
+                        <input asp-for="Lugares" class="form-control" type="number" placeholder="500" />
+                    </div>
+                    <span asp-validation-for="Lugares" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
                     <label asp-for="Preco" class="control-label text-theme-main fw-bold mb-1"></label>
                     <div class="input-group">
                         <input asp-for="Preco" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
