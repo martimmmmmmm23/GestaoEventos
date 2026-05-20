@@ -62,32 +62,12 @@ namespace GestãoEventos.Controllers
             return View(inscricao);
         }
 
-        // GET: Inscricoes/Create
-        public async Task<IActionResult> Create(int? id)
-        {
-            var model = new InscricaoViewModel();
-
-            // Se vier um ID de evento no link, tentamos pré-selecioná-lo
-            if (id.HasValue)
-            {
-                var evento = await _context.Eventos.FindAsync(id);
-                if (evento != null)
-                {
-                    model.EventoId = evento.Id;
-                    model.NomeEvento = evento.Nome;
-
-                }
-            }
-            model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId); //preenche a lista de eventos disponíveis para o dropdown
-
         [HttpGet]
         public async Task<IActionResult> ObterDetalhesEvento(int id)
         {
             // 1. Vai buscar a entidade original à BD
             var eventoDb = await _context.Eventos.FindAsync(id);
-
             if (eventoDb == null) return NotFound();
-
             // 2. Mapeia manualmente para o ViewModel que a tua Partial View exige
             var viewModel = new EventoViewModel
             {
@@ -104,9 +84,38 @@ namespace GestãoEventos.Controllers
             return PartialView("_DetailsEventoPartial", viewModel);
         }
 
+        // GET: Inscricoes/Create
+        public async Task<IActionResult> Create(int? id)
+        {
+            var model = new InscricaoViewModel();
 
-        // POST: Inscricoes/Create
-        [HttpPost]
+            // Se vier um ID de evento no link, tentamos pré-selecioná-lo
+            if (id.HasValue)
+            {
+                var evento = await _context.Eventos.FindAsync(id);
+                if (evento != null)
+                {
+                    model.EventoId = evento.Id;
+                    model.NomeEvento = evento.Nome;
+
+                }
+            }
+                if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    model.Email = User.Identity.Name; // Guarda o email do utilizador logado no ViewModel
+                }
+
+                model.EventosDisponiveis = new SelectList(
+                    _context.Eventos.Where(e => e.Data >= DateTime.Now),
+                    "Id",
+                    "Nome",
+                    model.EventoId
+                );
+            return View(model);
+        }
+
+            // POST: Inscricoes/Create
+            [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(InscricaoViewModel model)
         {
@@ -217,12 +226,26 @@ namespace GestãoEventos.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Organizador")]
-        public async Task<IActionResult> Edit(int oldEventoId, int oldParticipanteId, [Bind("EventoId,ParticipanteId")] Inscricao inscricao)
+        public async Task<IActionResult> Edit(int IdEventoAntigo, int IdParticipanteAntigo, [Bind("EventoId,ParticipanteId")] Inscricao inscricao)
         {
-            if (oldEventoId == 0 || oldParticipanteId == 0) return NotFound(); // Verifica se os IDs antigos existem na base de dados, caso contrário retorna NotFound
+            if (IdEventoAntigo == 0 || IdParticipanteAntigo == 0) return NotFound(); // Verifica se os IDs antigos existem na base de dados, caso contrário retorna NotFound
 
-            if (inscricao.EventoId != oldEventoId || inscricao.ParticipanteId != oldParticipanteId) // Se o organizador mudou o evento ou participante, precisamos verificar se a nova combinação já existe para evitar insersoes duplicadas
+            if (inscricao.EventoId != IdEventoAntigo || inscricao.ParticipanteId != IdParticipanteAntigo) // Se o organizador mudou o evento ou participante, precisamos verificar se a nova combinação já existe para evitar insersoes duplicadas
             {
+                var novoEvento = await _context.Eventos.FindAsync(inscricao.EventoId);
+                if (novoEvento != null && novoEvento.Data < DateTime.Now)
+                {
+                    ModelState.AddModelError("", "Não é possível mover uma inscrição para um evento que já ocorreu.");
+                    ViewData["EventoId"] = new SelectList(
+                        _context.Eventos.Where(e => e.Data >= DateTime.Now || e.Id == inscricao.EventoId),
+                        "Id",
+                        "Nome",
+                        inscricao.EventoId
+                    );
+                    ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
+                    return View(inscricao);
+                }
+
                 if (InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId)) // Verifica se já existe uma inscrição com a nova combinação de evento e participante. Se existir, adiciona um erro ao ModelState
                 {
                     ModelState.AddModelError("", "Este participante já está inscrito no evento selecionado.");
@@ -243,7 +266,7 @@ namespace GestãoEventos.Controllers
                 try
                 {
                     var inscricaoAntiga = await _context.Inscricoes // Procura a inscrição antiga usando os IDs antigos para garantir que estamos a editar a inscrição correta
-                        .FirstOrDefaultAsync(i => i.EventoId == oldEventoId && i.ParticipanteId == oldParticipanteId);
+                        .FirstOrDefaultAsync(i => i.EventoId == IdEventoAntigo && i.ParticipanteId == IdParticipanteAntigo);
 
                     if (inscricaoAntiga != null)
                     {
