@@ -177,7 +177,7 @@ namespace GestãoEventos.Controllers
 
                 var path = Path.Combine(
                     Directory.GetCurrentDirectory(),
-                    "wwwroot/images",
+                    "wwwroot/images/",
                     fileName);
 
                 using (var stream = new FileStream(path, FileMode.Create))
