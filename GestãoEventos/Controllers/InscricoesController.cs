@@ -1,5 +1,6 @@
 ﻿using GestãoEventos.Data;
 using GestãoEventos.Data.Classes;
+using GestãoEventos.ViewModel.Eventos;
 using GestãoEventos.ViewModel.Inscricoes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -77,25 +78,34 @@ namespace GestãoEventos.Controllers
 
                 }
             }
+            model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId); //preenche a lista de eventos disponíveis para o dropdown
 
-            if (User.Identity != null && User.Identity.IsAuthenticated)
+        [HttpGet]
+        public async Task<IActionResult> ObterDetalhesEvento(int id)
+        {
+            // 1. Vai buscar a entidade original à BD
+            var eventoDb = await _context.Eventos.FindAsync(id);
+
+            if (eventoDb == null) return NotFound();
+
+            // 2. Mapeia manualmente para o ViewModel que a tua Partial View exige
+            var viewModel = new EventoViewModel
             {
-                model.Email = User.Identity.Name; // Guarda o email do utilizador logado no ViewModel
-            }
+                Nome = eventoDb.Nome,
+                Data = eventoDb.Data,
+                Hora = eventoDb.Hora,
+                Local = eventoDb.Local,
+                Preco = eventoDb.Preco,
+                Descricao = eventoDb.Descricao,
+                Image = eventoDb.Image // Caminho da imagem string
+            };
 
-            model.EventosDisponiveis = new SelectList(
-                _context.Eventos.Where(e => e.Data >= DateTime.Now),
-                "Id",
-                "Nome",
-                model.EventoId
-            );
-
-            return View(model);
+            // 3. Passa o ViewModel correto
+            return PartialView("_DetailsEventoPartial", viewModel);
         }
 
 
         // POST: Inscricoes/Create
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(InscricaoViewModel model)
@@ -156,7 +166,6 @@ namespace GestãoEventos.Controllers
                     EventoId = model.EventoId,
                     ParticipanteId = participante.Id
                 };
-
                 _context.Inscricoes.Add(novaInscricao);
                 await _context.SaveChangesAsync();
 

@@ -9,7 +9,7 @@ namespace GestãoEventos.ViewModel.Inscricoes
 
         [Required(ErrorMessage = "O email é obrigatório.")]
         [EmailAddress(ErrorMessage = "O email deve ser válido.")] // Validação de email em relacao a um padrao ex: abc@domain.com
-        [Display(Name = "Email address")]
+        [Display(Name = "Endereço de Email")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "A seleção do evento é obrigatória.")]
