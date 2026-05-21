@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Criar";
 }
-
 <h1 class="text-theme-main fw-bold my-4">@ViewData["Title"]</h1>
 <h4 class="text-theme-muted">Nova Inscrição</h4>
 <hr class="border-color" />
@@ -21,7 +20,7 @@
 
                     @if (ViewBag.MostrarLinkRegisto == true)
                     {
-                        <div class="mt-2 p-3 border border-warning rounded bg-light">
+                        <div class="mt-2 p-3 border bg-theme-surface rounded">
                             <strong>Gostaria de criar conta?</strong>
                             <p class="text-muted mb-2 small">Parece que este e-mail ainda não está registado. Pode criar uma conta agora ou corrigir o e-mail acima.</p>
                             <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-sm btn-outline-primary">Criar Nova Conta</a>
