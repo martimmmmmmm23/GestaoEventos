@@ -235,6 +235,11 @@ namespace GestãoEventos.Controllers
             // Procurar utilizador no Identity
             var user = await _userManager.FindByEmailAsync(participante.Email);
 
+            if (User.IsInRole("Organizador") && participante.Email == User.Identity.Name)
+            {
+                return Forbid();
+            }
+
             // Apagar participante
             _context.Participantes.Remove(participante);
             await _context.SaveChangesAsync(); // É mais seguro gravar o Participante primeiro
