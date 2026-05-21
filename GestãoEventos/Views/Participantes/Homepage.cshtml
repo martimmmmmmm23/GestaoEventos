@@ -1,11 +1,10 @@
 ﻿@model GestãoEventos.ViewModel.Participantes.PerfilViewModel
 
 @{
-    ViewData["Title"] = "Editar Perfil";
+    ViewData["Title"] = "Bem-Vindo "+Model.NomeAtual;
 }
 
 <h1 class="text-theme-main fw-bold my-4">@ViewData["Title"]</h1>
-<h4 class="text-theme-muted">Participante</h4>
 <hr class="border-color" />
 
 <div class="row">
@@ -31,10 +30,7 @@
                         <button type="button" class="btn btn-primary px-4 rounded-pill" onclick="mostrarFormulario()">
                             Alterar Dados
                         </button>
-                        @if (User.IsInRole("Organizador"))
-                        {
-                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill ms-2">Voltar à Lista</a>
-                        }
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary rounded-pill ms-2">Voltar à Homepage</a>
                     </div>
 
                     <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger rounded-pill px-4">
@@ -97,6 +93,47 @@
 
         </div>
     </div>
+    <div class="col-md-6">
+        <div class="bg-theme-surface p-4 rounded-3 shadow-sm h-100">
+            <h5 class="fw-bold mb-4" style="color: var(--primary-accent);">Lista dos meus Eventos</h5>
+
+            @if (Model.Inscricoes != null && Model.Inscricoes.Any())
+            {
+                <div class="table">
+                    <table class="table">
+                        <thead class="text-theme-main">
+                            <tr>
+                                <th>Nome do Evento</th>
+                                <th>Data do Evento</th>
+                                <th class="text-end">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-theme-main">
+                            @foreach (var item in Model.Inscricoes)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@(item.Evento.Nome)</td>
+                                    <td>@item.Evento.Data.ToString("dd MMM yyyy") | @item.Evento.Hora.ToString(@"hh\:mm")</td>
+                                    <td class="text-end">
+                                        <a asp-controller="Inscricoes" asp-action="Delete" asp-route-participanteId="@item.ParticipanteId" asp-route-eventoId="@item.EventoId" class="mx-1" style="color: var(--primary-accent);">Cancelar Inscrição</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex h-75 align-items-center justify-content-center text-center p-4">
+                    <div class="text-theme-muted">
+                        <i class="bi bi-people fs-2 d-block mb-2 text-opacity-50"></i>
+                        <p class="mb-0 small">Ainda não existem participantes inscritos neste evento.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -114,7 +151,7 @@
 
         @if (!ViewData.ModelState.IsValid)
         {
-                @:mostrarFormulario();
+                    @:mostrarFormulario();
         }
     </script>
 }

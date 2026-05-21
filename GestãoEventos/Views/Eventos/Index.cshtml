@@ -30,8 +30,8 @@
             {
                 <tr>
                     <td class="fw-bold">@item.Nome</td>
-                    <td>@item.Data.ToString("dd/MM/yyyy")</td>
-                    <td>@item.Hora</td>
+                    <td>@item.Data.ToString("dd MMM yyyy")</td>
+                    <td>@item.Hora.ToString(@"hh\:mm")</td>
                     <td>@item.Local</td>
                     <td>@item.Preco</td>
                     <td class="text-end">
