@@ -42,15 +42,19 @@ namespace GestãoEventos.Controllers
             return View(inscricoes);
         }
 
+        private async Task<Inscricao?> DadosEventosParticipante(int? eventoId, int? participanteId)
+        {
+            return await _context.Inscricoes
+                .Include(i => i.Evento)
+                .Include(i => i.Participante)
+                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
+        }
         // GET: Inscricoes/Details/5
         public async Task<IActionResult> Details(int? eventoId, int? participanteId) // chave composta, por isso precisamos dos dois IDs para identificar a inscrição específica.
         {
             if (eventoId == null || participanteId == null) return NotFound();
 
-            var inscricao = await _context.Inscricoes
-                .Include(i => i.Evento)
-                .Include(i => i.Participante)
-                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId); //
+            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
 
             if (inscricao == null) return NotFound();
 
@@ -88,9 +92,7 @@ namespace GestãoEventos.Controllers
         {
             // 1. Vai buscar a entidade original à BD
             var eventoDb = await _context.Eventos.FindAsync(id);
-
             if (eventoDb == null) return NotFound();
-
             // 2. Mapeia manualmente para o ViewModel que a tua Partial View exige
             var viewModel = new EventoViewModel
             {
@@ -107,6 +109,16 @@ namespace GestãoEventos.Controllers
             return PartialView("_DetailsEventoPartial", viewModel);
         }
 
+        private void CarregarDadosEventos(InscricaoViewModel model)
+        {
+            model.EventosDisponiveis = new SelectList(
+                _context.Eventos.Where(e => e.Data >= DateTime.Now),
+                "Id",
+                "Nome",
+                model.EventoId
+            );
+        }
+
         // POST: Inscricoes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -114,43 +126,62 @@ namespace GestãoEventos.Controllers
         {
             if (ModelState.IsValid)
             {
+                var evento = await _context.Eventos
+                    .Include(e => e.Inscricoes)
+                    .FirstOrDefaultAsync(e => e.Id == model.EventoId);
+
+                if (evento == null || evento.Data < DateTime.Now)
+                {
+                    ModelState.AddModelError("EventoId", "O evento selecionado não existe ou já ocorreu.");
+                    CarregarDadosEventos(model);
+                    return View(model);
+                }
+
                 var participante = await _context.Participantes
                     .FirstOrDefaultAsync(p => p.Email == model.Email);
 
                 if (participante == null)
                 {
-                    // 1. Mantemos a mensagem de erro normal
                     ModelState.AddModelError("Email", "Participante não encontrado. Verifique o e-mail ou crie conta.");
 
-                    // 2. NOVA LINHA: Enviamos um "sinal" para a View mostrar o link
                     ViewBag.MostrarLinkRegisto = true;
-
-                    model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
+                    CarregarDadosEventos(model);
                     return View(model);
                 }
 
+
+                if (evento.Inscricoes.Count >= evento.Lugares)
+                {
+                    ModelState.AddModelError("", "Não existem lugares disponíveis para este evento.");
+                    CarregarDadosEventos(model);
+                    return View(model);
+                }
+
+                // já inscrito
                 bool jaInscrito = await _context.Inscricoes
                     .AnyAsync(i => i.EventoId == model.EventoId && i.ParticipanteId == participante.Id);
 
                 if (jaInscrito)
                 {
                     ModelState.AddModelError("Email", "Este e-mail já se encontra num registo neste evento.");
-                    model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
+                    CarregarDadosEventos(model);
                     return View(model);
                 }
 
+                // criar inscrição
                 var novaInscricao = new Inscricao
                 {
                     EventoId = model.EventoId,
                     ParticipanteId = participante.Id
                 };
+
                 _context.Inscricoes.Add(novaInscricao);
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction("Index", "Eventos");
             }
 
-            model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
+            CarregarDadosEventos(model);
             return View(model);
         }
 
@@ -165,10 +196,7 @@ namespace GestãoEventos.Controllers
         {
             if (eventoId == null || participanteId == null) return NotFound();
 
-            var inscricao = await _context.Inscricoes
-                .Include(i => i.Evento)
-                .Include(i => i.Participante)
-                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
+            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
 
             if (inscricao == null) return NotFound();
 
@@ -187,8 +215,7 @@ namespace GestãoEventos.Controllers
         [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> DeleteConfirmed(int? eventoId, int? participanteId)
         {
-            var inscricao = await _context.Inscricoes
-                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
+            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
 
             if (inscricao != null)
             {

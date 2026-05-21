@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using GestãoEventos.Data;
+﻿using GestãoEventos.Data;
 using GestãoEventos.Data.Classes;
 using GestãoEventos.ViewModel.Eventos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace GestãoEventos.Controllers
 {
@@ -35,11 +36,13 @@ namespace GestãoEventos.Controllers
 
             var evento = await _context.Eventos
                         .Include(e => e.Inscricoes)
-                        .ThenInclude(i => i.Participante)
+                        .ThenInclude(e => e.Participante)
                         .FirstOrDefaultAsync(x => x.Id == id);
 
             if (evento == null)
                 return NotFound();
+
+            ViewBag.EventoId = evento.Id;
 
             var model = new EventoViewModel
             {
@@ -72,6 +75,17 @@ namespace GestãoEventos.Controllers
         {
             if (!ModelState.IsValid)
                 return View(model);
+
+            bool localOcupado = await _context.Eventos.AnyAsync(e =>
+                e.Data == model.Data &&
+                e.Hora == model.Hora &&
+                e.Local == model.Local);
+
+            if (localOcupado)
+            {
+                ModelState.AddModelError(string.Empty, "Conflito de agenda: Já existe um evento marcado para este Local, nessa Data e Hora.");
+                return View(model);
+            }
 
             var evento = new Evento
             {
@@ -149,10 +163,24 @@ namespace GestãoEventos.Controllers
         [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Edit(int id, EventoViewModel model)
         {
+          
             var evento = await _context.Eventos.FindAsync(id);
 
             if (evento == null)
                 return NotFound();
+
+            bool localOcupado = await _context.Eventos.AnyAsync(e =>
+              e.Id != id &&
+              e.Data == model.Data &&
+              e.Hora == model.Hora &&
+              e.Local == model.Local);
+
+            if (localOcupado)
+            {
+                ModelState.AddModelError(string.Empty, "Conflito de agenda: Já existe outro evento marcado para este Local, nessa Data e Hora.");
+                ViewBag.Id = id;
+                return View(model);
+            }
 
             if (!ModelState.IsValid)
             {
@@ -228,6 +256,56 @@ namespace GestãoEventos.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> ExportParticipants(int id)
+        {
+            var evento = await _context.Eventos
+                .Include(e => e.Inscricoes)
+                    .ThenInclude(i => i.Participante)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (evento == null)
+                return NotFound();
+
+            var csv = new StringBuilder();
+
+       
+            csv.AppendLine($"Evento: {evento.Nome}");
+            csv.AppendLine($"Data: {evento.Data:dd/MM/yyyy}");
+            csv.AppendLine("");
+
+           
+            csv.AppendLine("Nome,Email");
+
+           
+            foreach (var insc in evento.Inscricoes)
+            {
+                csv.AppendLine($"{insc.Participante.Nome},{insc.Participante.Email}");
+            }
+
+            var fileName = $"evento_{SanitizeFileName(evento.Nome)}_participantes.csv";
+
+            return File(
+                Encoding.UTF8.GetBytes(csv.ToString()),
+                "text/csv",
+                fileName
+            );
+        }
+
+        private string SanitizeFileName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "evento";
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+
+            foreach (var c in invalidChars)
+            {
+                name = name.Replace(c, '_');
+            }
+
+            return name.Replace(" ", "_");
         }
     }
 }
