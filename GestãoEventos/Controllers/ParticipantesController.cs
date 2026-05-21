@@ -100,7 +100,7 @@ namespace GestãoEventos.Controllers
             var participante = await _context.Participantes.FindAsync(id);
             if (participante == null) return NotFound();
 
-            if (!User.IsInRole("Organizador") && participante.Email != User.Identity.Name) return Forbid();
+            if (participante.Email != User.Identity.Name) return Forbid();
 
             var userLogin = await _userManager.FindByEmailAsync(participante.Email);
 
