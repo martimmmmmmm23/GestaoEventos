@@ -166,56 +166,59 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Inscricoes/Delete/5
-        [Authorize(Roles = "Organizador")]
+        [Authorize]
         public async Task<IActionResult> Delete(int? eventoId, int? participanteId)
         {
-            if (eventoId == null || participanteId == null) return NotFound();
+            var user = await _context.Participantes.FindAsync(participanteId);
 
-            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
-
-            if (inscricao == null) return NotFound();
-
-            var viewModel = new InscricaoViewModel
+            if (User.Identity != null && User.Identity.IsAuthenticated && user.Email == User.Identity.Name || User.IsInRole("Organizador"))
             {
-                EventoId = inscricao.EventoId,
-                ParticipanteId = inscricao.ParticipanteId,
-                Nome = inscricao.Participante.Nome,
-                Email = inscricao.Participante.Email,
-                NomeEvento = inscricao.Evento.Nome
-            };
+                if (eventoId == null || participanteId == null) return NotFound();
 
-            return View(viewModel);
+                var inscricao = await DadosEventosParticipante(eventoId, participanteId);
+
+                if (inscricao == null) return NotFound();
+
+                var viewModel = new InscricaoViewModel
+                {
+                    EventoId = inscricao.EventoId,
+                    ParticipanteId = inscricao.ParticipanteId,
+                    Nome = inscricao.Participante.Nome,
+                    Email = inscricao.Participante.Email,
+                    NomeEvento = inscricao.Evento.Nome
+                };
+
+                return View(viewModel);
+            }
+            else
+            {
+                return Forbid();
+            }
         }
 
         // POST: Inscricoes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Organizador")]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int? eventoId, int? participanteId)
         {
-            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
+            var user = await _context.Participantes.FindAsync(participanteId);
 
-            if (inscricao != null)
+            if (User.Identity != null && User.Identity.IsAuthenticated && user.Email == User.Identity.Name || User.IsInRole("Organizador"))
             {
-                _context.Inscricoes.Remove(inscricao);
-                await _context.SaveChangesAsync();
+                var inscricao = await DadosEventosParticipante(eventoId, participanteId);
+
+                if (inscricao != null)
+                {
+                    _context.Inscricoes.Remove(inscricao);
+                    await _context.SaveChangesAsync();
+                }
+                return User.IsInRole("Organizador") ? RedirectToAction("Details", "Eventos", new { id = eventoId }) : RedirectToAction("Index", "Home");
             }
-            return RedirectToAction("Details", "Eventos", new { id = eventoId }); // Redireciona para a lista de inscrições após a exclusão
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Utilizador")]
-        public async Task<IActionResult> DeleteParticipante(int? eventoId, int? participanteId)
-        {
-            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
-
-            if (inscricao != null)
+            else
             {
-                _context.Inscricoes.Remove(inscricao);
-                await _context.SaveChangesAsync();
+                return Forbid();
             }
-            return RedirectToAction("Index", "Home");
         }
     }
 }

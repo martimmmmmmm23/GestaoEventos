@@ -23,12 +23,14 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Eventos
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Eventos.ToListAsync());
         }
 
         // GET: Eventos/Details/5
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)

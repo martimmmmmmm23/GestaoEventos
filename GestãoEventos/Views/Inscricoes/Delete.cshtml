@@ -23,7 +23,14 @@
     <div class="mt-4">
         <form asp-action="Delete">
             <input type="submit" asp-route-participanteId="@Model.ParticipanteId" asp-route-eventoId="@Model.EventoId" value="Eliminar" class="btn btn-danger px-5 rounded-pill" />
-            <a asp-controller="Eventos" asp-action="Details" asp-route-id="@Model.EventoId" class="btn btn-secondary px-5 rounded-pill">Cancelar</a>
+            @if (User.IsInRole("Organizador"))
+                {
+                    <a asp-controller="Eventos" asp-action="Details" asp-route-id="@Model.EventoId" class="btn btn-secondary px-5 rounded-pill">Cancelar</a>
+                }
+                else
+                {
+                <a asp-controller="Participantes" asp-action="Homepage" asp-route-id="@Model.ParticipanteId" class="btn btn-secondary px-5 rounded-pill">Cancelar</a>
+                }           
         </form>
     </div>
 </div>
