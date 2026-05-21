@@ -2,16 +2,16 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-@model IEnumerable<GestãoEventos.ViewModel.Eventos.EventoViewModel> //listar vários eventos 
+@model IEnumerable<GestãoEventos.Data.Classes.Evento> //listar vários eventos
 @{
     ViewData["Title"] = "Bem-vindo";
     var agora = DateTime.Now;
 
     var eventosFuturos = Model?.Where(e => e.Data >= agora).OrderBy(e => e.Data).ToList() 
-                        ?? new List<GestãoEventos.ViewModel.Eventos.EventoViewModel>();
+                        ?? new List<GestãoEventos.Data.Classes.Evento>();
 
     var eventosPassados = Model?.Where(e => e.Data < agora).OrderByDescending(e => e.Data).ToList()
-                        ?? new List<GestãoEventos.ViewModel.Eventos.EventoViewModel>();
+                        ?? new List<GestãoEventos.Data.Classes.Evento>();
 }
 <head>
     <link rel="stylesheet" href="../Views/Home/Index.css" asp-append-version="true" />
@@ -50,21 +50,24 @@
                             </div>
                             
                             <div class="card-body">
-                                @* Nr Lugares *@
-                                @if(item.Lugares == null)
-                                {
-                                    <span class="badge bg-success bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Ilimitado</span>
-                                }
-                                else if(item.Lugares > item.Inscricoes.Count())
-                                {
-                                    <span class="badge bg-info bg-opacity-75 mb-2 px-3 py-2 rounded-pill">@(item.Lugares - item.Inscricoes.Count()) Disponíveis</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger bg-opacity-75 mb-2 px-3 py-2 rounded-pill">Esgotado</span>
-                                }
+
                                 <div class="d-flex justify-content-between align-items-center fw-bold small text-uppercase mb-2">
-                                    <span>@item.Data.ToString("dd MMM yyyy") | @item.Hora.ToString(@"hh\:mm")</span>
+                                    <span class="fs-6">
+                                    @if (item.Lugares == null)
+                                    {
+                                            <span class="badge bg-success text-white rounded-pill px-3 py-1 fw-bold" style="letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(25, 135, 84, 0.4);">Ilimitado</span>
+                                    }
+                                    else if (item.Lugares > item.Inscricoes.Count())
+                                    {
+                                            <span class="badge bg-success text-white rounded-pill px-3 py-1 fw-bold" style="letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(25, 135, 84, 0.4);">
+                                            @(item.Lugares - item.Inscricoes.Count()) Disponíveis
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger text-white rounded-pill px-3 py-1 fw-bold">Esgotado</span>
+                                    }
+                                    </span>
                                     <span class="fs-6">
                                         @if (item.Preco == 0)
                                         {
@@ -75,6 +78,10 @@
                                             @item.Preco.ToString("0.00 €")
                                         }
                                     </span>
+
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center fw-bold small text-uppercase mb-2">
+                                    <span>@item.Data.ToString("dd MMM yyyy") | @item.Hora.ToString(@"hh\:mm")</span>
                                 </div>
                                 @if (!string.IsNullOrEmpty(item.Image))
                                 {
@@ -87,7 +94,7 @@
                                 <p class="card-text text-theme-muted small"><i class="bi bi-geo-alt"></i> @item.Local</p>
                             </div>
                             <div class="card-footer bg-transparent border-0 pb-3 pt-0">
-                                <a asp-action="Index" class="btn btn-sm btn-primary w-100 py-2 fw-bold">Inscreva-se</a>
+                                <a asp-controller="Inscricoes" asp-action="Create" asp-route-id="@item.Id" class="btn btn-sm btn-primary w-100 py-2 fw-bold">Inscreva-se</a>
                             </div>
                         </div>
                     </div>

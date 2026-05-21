@@ -300,9 +300,9 @@ namespace GestãoEventos.Controllers
 
         // GET: Inscricoes/Delete/5
         [Authorize(Roles = "Organizador")]
-        public async Task<IActionResult> Delete(int? eventoId, int? participanteId)
+        public async Task<IActionResult> Delete(int? idEvento, int? idParticipante)
         {
-            if (eventoId == null || participanteId == null) return NotFound();
+            if (idEvento == null || idParticipante == null) return NotFound();
 
             var inscricao = await DadosEventosParticipante(eventoId, participanteId);
 
