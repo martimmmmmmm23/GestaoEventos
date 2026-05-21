@@ -4,7 +4,8 @@
     ViewData["Title"] = "Index";
 }
 
-<h1 class="text-theme-main fw-bold my-4">Participantes</h1>
+<h1 class="text-theme-main fw-bold my-4">Utilizadores</h1>
+<h5 class="text-theme-main fw-bold my-4">Lista de Utilizadores</h5>
 
 @* <p>
     <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary rounded-pill px-4">
@@ -12,7 +13,7 @@
     </a>
 </p> *@
 
-<div class="=" bg-theme-surface p-3 rounded-3 shadow-sm">
+<div class="bg-theme-surface p-3 rounded-3 shadow-sm">
     <table class="table">
         <thead class="text-theme-main">
             <tr>
@@ -28,8 +29,6 @@
                     <td class="fw-bold">@item.Nome</td>
                     <td>@item.Email</td>
                     <td class="text-end">
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="mx-1" style="color: var(--primary-accent);">Editar</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id" class="mx-1" style="color: var(--primary-accent);">Detalhes</a> |
                         <a asp-action="Delete" asp-route-id="@item.Id" class="mx-1" style="color: var(--primary-accent);">Eliminar</a>
                     </td>
                 </tr>
