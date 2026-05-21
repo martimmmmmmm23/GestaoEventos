@@ -178,7 +178,10 @@ namespace GestãoEventos.Controllers
             var viewModel = new InscricaoViewModel
             {
                 EventoId = inscricao.EventoId,
-                ParticipanteId = inscricao.ParticipanteId
+                ParticipanteId = inscricao.ParticipanteId,
+                Nome = inscricao.Participante.Nome,
+                Email = inscricao.Participante.Email,
+                NomeEvento = inscricao.Evento.Nome
             };
 
             return View(viewModel);
@@ -197,7 +200,7 @@ namespace GestãoEventos.Controllers
                 _context.Inscricoes.Remove(inscricao);
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction(nameof(Index)); // Redireciona para a lista de inscrições após a exclusão
+            return RedirectToAction("Details", "Eventos", new { id = eventoId }); // Redireciona para a lista de inscrições após a exclusão
         }
     }
 }
