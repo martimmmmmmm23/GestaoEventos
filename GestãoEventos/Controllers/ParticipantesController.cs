@@ -109,6 +109,27 @@ namespace GestãoEventos.Controllers
 
             if (ModelState.IsValid)
             {
+                // O email já existe ?
+                if (model.NovoEmail != participante.Email)
+                {
+                    var emailJaExiste = await _userManager.FindByEmailAsync(model.NovoEmail);
+                    if (emailJaExiste != null)
+                    {
+                        ModelState.AddModelError("NovoEmail", "Este email já se encontra registado noutra conta.");
+                        return RepopularView(model, participante);
+                    }
+                }
+
+                // Esqueceu-se da password atual ?
+                if (!string.IsNullOrEmpty(model.NovaPassword))
+                {
+                    if (string.IsNullOrEmpty(model.PasswordAtual))
+                    {
+                        ModelState.AddModelError("PasswordAtual", "Para alterar a password, precisa de inserir a password atual.");
+                        return RepopularView(model, participante);
+                    }
+                }
+
                 bool precisaAtualizarLogin = false;
 
                 // Alterar Nome
@@ -118,27 +139,35 @@ namespace GestãoEventos.Controllers
                     if (userLogin != null) userLogin.NomeCompleto = model.NovoNome;
                 }
 
-                // Alterar Email
+                // Alterar Email no Identity
                 if (model.NovoEmail != participante.Email)
                 {
                     if (userLogin != null)
                     {
-                        await _userManager.SetEmailAsync(userLogin, model.NovoEmail);
-                        await _userManager.SetUserNameAsync(userLogin, model.NovoEmail);
+                        // Tenta trocar o Email no Identity e verifica se teve sucesso
+                        var setEmailResult = await _userManager.SetEmailAsync(userLogin, model.NovoEmail);
+                        if (!setEmailResult.Succeeded)
+                        {
+                            foreach (var erro in setEmailResult.Errors) ModelState.AddModelError("", erro.Description);
+                            return RepopularView(model, participante);
+                        }
+
+                        // Tenta trocar o UserName no Identity e verifica se teve sucesso
+                        var setUserNameResult = await _userManager.SetUserNameAsync(userLogin, model.NovoEmail);
+                        if (!setUserNameResult.Succeeded)
+                        {
+                            foreach (var erro in setUserNameResult.Errors) ModelState.AddModelError("", erro.Description);
+                            return RepopularView(model, participante);
+                        }
+
                         precisaAtualizarLogin = true;
                     }
                     participante.Email = model.NovoEmail;
                 }
 
-                // Alterar Password
+                // Alterar Password no Identity
                 if (!string.IsNullOrEmpty(model.NovaPassword))
                 {
-                    if (string.IsNullOrEmpty(model.PasswordAtual))
-                    {
-                        ModelState.AddModelError("PasswordAtual", "Para alterar a password, precisa de inserir a password atual.");
-                        return RepopularView(model, participante);
-                    }
-
                     var resultPass = await _userManager.ChangePasswordAsync(userLogin, model.PasswordAtual, model.NovaPassword);
                     if (!resultPass.Succeeded)
                     {
@@ -147,12 +176,13 @@ namespace GestãoEventos.Controllers
                     }
                     precisaAtualizarLogin = true;
                 }
+
                 _context.Update(participante);
                 await _context.SaveChangesAsync();
 
                 if (userLogin != null) await _userManager.UpdateAsync(userLogin);
 
-                // Se mudou email ou password, renova o cookie de login para o utilizador não ser desconectado
+                // Renovar a sessão para evitar logout
                 if (precisaAtualizarLogin && userLogin != null)
                 {
                     await _signInManager.RefreshSignInAsync(userLogin);
