@@ -29,6 +29,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Participantes
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Index()
         {
             var listParticipante = _context.Participantes;
@@ -37,6 +38,7 @@ namespace GestãoEventos.Controllers
         }
 
         // GET: Participantes/Details/5
+        [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -54,13 +56,7 @@ namespace GestãoEventos.Controllers
             return View(participante);
         }
 
-        // GET: Participantes/Create
-        public IActionResult Create()
-        {
-            return RedirectToPage("/Account/Register", new { area = "Identity" });
-        }
-
-        // GET: Participantes/Edit/5
+        // GET: Participantes/HomePage/5
         [Authorize]
         public async Task<IActionResult> HomePage(int? id)
         {
