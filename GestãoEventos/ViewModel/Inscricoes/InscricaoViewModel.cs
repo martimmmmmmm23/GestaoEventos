@@ -5,6 +5,8 @@ namespace GestãoEventos.ViewModel.Inscricoes
 {
     public class InscricaoViewModel
     {
+        public int? ParticipanteId { get; set; }
+
         //[Required(ErrorMessage = "O nome é obrigatório.")]
         [Display(Name = "Nome Completo")]
         public string? Nome { get; set; }

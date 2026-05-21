@@ -75,6 +75,7 @@ namespace GestãoEventos.Controllers
                 {
                     model.EventoId = evento.Id;
                     model.NomeEvento = evento.Nome;
+                    ObterDetalhesEvento(id);
                 }
             }
             model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId); //preenche a lista de eventos disponíveis para o dropdown
@@ -153,84 +154,84 @@ namespace GestãoEventos.Controllers
             return View(model);
         }
 
-        // GET: Inscricoes/Edit/5
+        //// GET: Inscricoes/Edit/5
 
-        [Authorize(Roles = "Organizador")] // Apenas organizadores podem editar
-        public async Task<IActionResult> Edit(int? eventoId, int? participanteId)
-        {
-            if (eventoId == null || participanteId == null)
-            {
-                return NotFound();
-            }
+        //[Authorize(Roles = "Organizador")] // Apenas organizadores podem editar
+        //public async Task<IActionResult> Edit(int? eventoId, int? participanteId)
+        //{
+        //    if (eventoId == null || participanteId == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var inscricao = await _context.Inscricoes
-                .Include(i => i.Evento)
-                .Include(i => i.Participante)
-                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
+        //    var inscricao = await _context.Inscricoes
+        //        .Include(i => i.Evento)
+        //        .Include(i => i.Participante)
+        //        .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
 
-            if (inscricao == null)
-            {
-                return NotFound();
-            }
+        //    if (inscricao == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            // Preparamos as listas para as dropdowns, caso o organizador queira mudar o evento ou participante
-            ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
-            ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
+        //    // Preparamos as listas para as dropdowns, caso o organizador queira mudar o evento ou participante
+        //    ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
+        //    ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
 
-            return View(inscricao);
-        }
+        //    return View(inscricao);
+        //}
 
-        // POST: Inscricoes/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Organizador")]
-        public async Task<IActionResult> Edit(int oldEventoId, int oldParticipanteId, [Bind("EventoId,ParticipanteId")] Inscricao inscricao)
-        {
-            if (oldEventoId == 0 || oldParticipanteId == 0) return NotFound(); // Verifica se os IDs antigos existem na base de dados, caso contrário retorna NotFound
+        //// POST: Inscricoes/Edit/5
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //[Authorize(Roles = "Organizador")]
+        //public async Task<IActionResult> Edit(int oldEventoId, int oldParticipanteId, [Bind("EventoId,ParticipanteId")] Inscricao inscricao)
+        //{
+        //    if (oldEventoId == 0 || oldParticipanteId == 0) return NotFound(); // Verifica se os IDs antigos existem na base de dados, caso contrário retorna NotFound
 
-            if (inscricao.EventoId != oldEventoId || inscricao.ParticipanteId != oldParticipanteId) // Se o organizador mudou o evento ou participante, precisamos verificar se a nova combinação já existe para evitar insersoes duplicadas
-            {
-                if (InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId)) // Verifica se já existe uma inscrição com a nova combinação de evento e participante. Se existir, adiciona um erro ao ModelState
-                {
-                    ModelState.AddModelError("", "Este participante já está inscrito no evento selecionado.");
+        //    if (inscricao.EventoId != oldEventoId || inscricao.ParticipanteId != oldParticipanteId) // Se o organizador mudou o evento ou participante, precisamos verificar se a nova combinação já existe para evitar insersoes duplicadas
+        //    {
+        //        if (InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId)) // Verifica se já existe uma inscrição com a nova combinação de evento e participante. Se existir, adiciona um erro ao ModelState
+        //        {
+        //            ModelState.AddModelError("", "Este participante já está inscrito no evento selecionado.");
 
-                    ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
-                    ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
-                    return View(inscricao);
-                }
-            }
+        //            ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
+        //            ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
+        //            return View(inscricao);
+        //        }
+        //    }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    var inscricaoAntiga = await _context.Inscricoes // Procura a inscrição antiga usando os IDs antigos para garantir que estamos a editar a inscrição correta
-                        .FirstOrDefaultAsync(i => i.EventoId == oldEventoId && i.ParticipanteId == oldParticipanteId);
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            var inscricaoAntiga = await _context.Inscricoes // Procura a inscrição antiga usando os IDs antigos para garantir que estamos a editar a inscrição correta
+        //                .FirstOrDefaultAsync(i => i.EventoId == oldEventoId && i.ParticipanteId == oldParticipanteId);
 
-                    if (inscricaoAntiga != null)
-                    {
-                        _context.Inscricoes.Remove(inscricaoAntiga);// Se a inscrição antiga for encontrada, ela é removida do banco de dados e substituida por uma nova inscrição com os novos IDs de evento e participante. Isso é necessário porque a chave primária da tabela de inscrições é composta pelos IDs de evento e participante, e não podemos simplesmente atualizar esses campos sem remover a inscrição antiga primeiro.
-                        await _context.SaveChangesAsync();
-                    }
+        //            if (inscricaoAntiga != null)
+        //            {
+        //                _context.Inscricoes.Remove(inscricaoAntiga);// Se a inscrição antiga for encontrada, ela é removida do banco de dados e substituida por uma nova inscrição com os novos IDs de evento e participante. Isso é necessário porque a chave primária da tabela de inscrições é composta pelos IDs de evento e participante, e não podemos simplesmente atualizar esses campos sem remover a inscrição antiga primeiro.
+        //                await _context.SaveChangesAsync();
+        //            }
 
-                    _context.Inscricoes.Add(inscricao);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException) //
-                {
-                    if (!InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId))
-                    {
-                        return NotFound();
-                    }
-                    else { throw; }
-                }
-                return RedirectToAction(nameof(Index));
-            }
+        //            _context.Inscricoes.Add(inscricao);
+        //            await _context.SaveChangesAsync();
+        //        }
+        //        catch (DbUpdateConcurrencyException) //
+        //        {
+        //            if (!InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId))
+        //            {
+        //                return NotFound();
+        //            }
+        //            else { throw; }
+        //        }
+        //        return RedirectToAction(nameof(Index));
+        //    }
 
-            ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
-            ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
-            return View(inscricao);
-        }
+        //    ViewData["EventoId"] = new SelectList(_context.Eventos, "Id", "Nome", inscricao.EventoId);
+        //    ViewData["ParticipanteId"] = new SelectList(_context.Participantes, "Id", "Nome", inscricao.ParticipanteId);
+        //    return View(inscricao);
+        //}
 
         private bool InscricaoExists(int eventoId, int participanteId)
         {
@@ -239,25 +240,31 @@ namespace GestãoEventos.Controllers
 
         // GET: Inscricoes/Delete/5
         [Authorize(Roles = "Organizador")]
-        public async Task<IActionResult> Delete(int? idEvento, int? idParticipante)
+        public async Task<IActionResult> Delete(int? eventoId, int? participanteId)
         {
-            if (idEvento == null || idParticipante == null) return NotFound();
+            if (eventoId == null || participanteId == null) return NotFound();
 
             var inscricao = await _context.Inscricoes
                 .Include(i => i.Evento)
                 .Include(i => i.Participante)
-                .FirstOrDefaultAsync(m => m.EventoId == idEvento && m.ParticipanteId == idParticipante);
+                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
 
             if (inscricao == null) return NotFound();
 
-            return View(inscricao);
+            var viewModel = new InscricaoViewModel
+            {
+                EventoId = inscricao.EventoId,
+                ParticipanteId = inscricao.ParticipanteId
+            };
+
+            return View(viewModel);
         }
 
         // POST: Inscricoes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Organizador")]
-        public async Task<IActionResult> DeleteConfirmed(int eventoId, int participanteId)
+        public async Task<IActionResult> DeleteConfirmed(int? eventoId, int? participanteId)
         {
             var inscricao = await _context.Inscricoes
                 .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);

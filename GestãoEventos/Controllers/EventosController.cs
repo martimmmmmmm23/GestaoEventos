@@ -35,6 +35,7 @@ namespace GestãoEventos.Controllers
 
             var evento = await _context.Eventos
                         .Include(e => e.Inscricoes)
+                        .ThenInclude(i => i.Participante)
                         .FirstOrDefaultAsync(x => x.Id == id);
 
             if (evento == null)
