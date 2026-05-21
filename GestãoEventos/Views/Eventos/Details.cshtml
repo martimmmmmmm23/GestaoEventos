@@ -57,7 +57,7 @@
                                         @(item.Participante.Email)
                                     </td>
                                     <td class="text-end">
-                                        <a asp-controller="Inscricoes" asp-action="Delete" asp-route-idParticipante="@item.ParticipanteId" asp-route-idEvento="@item.EventoId" class="btn btn-danger" style="color: var(--primary-accent);">Eliminar</a>
+                                        <a asp-controller="Inscricoes" asp-action="Delete" asp-route-participanteId="@item.ParticipanteId" asp-route-eventoId="@item.EventoId" class="btn btn-danger" style="color: var(--primary-accent);">Eliminar</a>
                                     </td>
                                 </tr>
                             }
