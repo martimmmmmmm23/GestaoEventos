@@ -1,6 +1,5 @@
 ﻿using GestãoEventos.Data;
 using GestãoEventos.Data.Classes;
-using GestãoEventos.ViewModel.Eventos;
 using GestãoEventos.ViewModel.Inscricoes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,52 +17,12 @@ namespace GestãoEventos.Controllers
             _context = context;
         }
 
-        // GET: Inscricoes
-        public async Task<IActionResult> Index()
-        {
-            // 1. Guardar o email numa variável ANTES da consulta à base de dados
-            var userEmail = User.Identity?.Name;
-
-            // Prepara a consulta base
-            var query = _context.Inscricoes
-                .Include(i => i.Evento)
-                .Include(i => i.Participante)
-                .AsQueryable();
-
-            // NOVA REGRA: Se NÃO for Organizador, filtra as inscrições
-            if (!User.IsInRole("Organizador"))
-            {
-                // 2. Usar a variável no filtro e garantir que o Participante existe mesmo
-                query = query.Where(i => i.Participante != null && i.Participante.Email == userEmail);
-            }
-
-            var inscricoes = await query.ToListAsync();
-
-            return View(inscricoes);
-        }
-
         private async Task<Inscricao?> DadosEventosParticipante(int? eventoId, int? participanteId)
         {
             return await _context.Inscricoes
                 .Include(i => i.Evento)
                 .Include(i => i.Participante)
                 .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
-        }
-        // GET: Inscricoes/Details/5
-        public async Task<IActionResult> Details(int? eventoId, int? participanteId) // chave composta, por isso precisamos dos dois IDs para identificar a inscrição específica.
-        {
-            if (eventoId == null || participanteId == null) return NotFound();
-
-            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
-
-            if (inscricao == null) return NotFound();
-
-            if (!User.IsInRole("Organizador") && inscricao.Participante.Email != User.Identity.Name)
-            {
-                return Forbid(); // Dá erro 403 - Acesso Negado
-            }
-
-            return View(inscricao);
         }
 
         // GET: Inscricoes/Create
@@ -82,7 +41,13 @@ namespace GestãoEventos.Controllers
                     model.EventoSelecionado = evento;
                 }
             }
-            model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId); //preenche a lista de eventos disponíveis para o dropdown
+
+            if (User.Identity != null && User.Identity.IsAuthenticated) // Injetar o email automaticamente
+            {
+                model.Email = User.Identity.Name;
+            }
+
+            CarregarDadosEventos(model);
             ViewBag.SelectedId = id;
             return View(model);
         }
@@ -96,11 +61,15 @@ namespace GestãoEventos.Controllers
                 model.EventoSelecionado = evento;
             }
 
-            // Preenche novamente o dropdown para manter a seleção ativa
-            model.EventosDisponiveis = new SelectList(_context.Eventos, "Id", "Nome", model.EventoId);
+            if (User.Identity != null && User.Identity.IsAuthenticated) // Injetar o email automaticamente
+            {
+                model.Email = User.Identity.Name;
+            }
 
             // Limpa validações pendentes (como o Email em branco) porque ele só quer ver o evento
             ModelState.Clear();
+
+            CarregarDadosEventos(model);
 
             return View("Create", model);
         }
@@ -122,6 +91,16 @@ namespace GestãoEventos.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (User.Identity != null && User.Identity.IsAuthenticated && !User.IsInRole("Organizador"))
+                {
+                    // Se o e-mail preenchido for diferente do e-mail de quem fez login
+                    if (model.Email != User.Identity.Name)
+                    {
+                        ModelState.AddModelError("Email", "Não tem permissão para inscrever outros participantes.");
+                        CarregarDadosEventos(model);
+                        return View(model);
+                    }
+                }
                 var evento = await _context.Eventos
                     .Include(e => e.Inscricoes)
                     .FirstOrDefaultAsync(e => e.Id == model.EventoId);
@@ -199,7 +178,10 @@ namespace GestãoEventos.Controllers
             var viewModel = new InscricaoViewModel
             {
                 EventoId = inscricao.EventoId,
-                ParticipanteId = inscricao.ParticipanteId
+                ParticipanteId = inscricao.ParticipanteId,
+                Nome = inscricao.Participante.Nome,
+                Email = inscricao.Participante.Email,
+                NomeEvento = inscricao.Evento.Nome
             };
 
             return View(viewModel);
@@ -218,7 +200,7 @@ namespace GestãoEventos.Controllers
                 _context.Inscricoes.Remove(inscricao);
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction(nameof(Index)); // Redireciona para a lista de inscrições após a exclusão
+            return RedirectToAction("Details", "Eventos", new { id = eventoId }); // Redireciona para a lista de inscrições após a exclusão
         }
     }
 }

@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Criar";
 }
-
 <h1 class="text-theme-main fw-bold my-4">@ViewData["Title"]</h1>
 <h4 class="text-theme-muted">Nova Inscrição</h4>
 <hr class="border-color" />
@@ -16,12 +15,18 @@
             <div class="bg-theme-surface p-4 rounded-3 shadow-sm h-100">
                 <div class="form-group mb-3">
                     <label asp-for="Email" class="control-label"></label>
-                    <input asp-for="Email" class="form-control" placeholder="exemplo@email.com" />
+
+                    @* O campo fica 'readonly' se o utilizador estiver logado E NÃO for Organizador *@
+                    <input asp-for="Email"
+                           class="form-control"
+                           placeholder="exemplo@email.com"
+                           readonly="@(User.Identity != null && User.Identity.IsAuthenticated && !User.IsInRole("Organizador") ? "readonly" : null)" />
+
                     <span asp-validation-for="Email" class="text-danger"></span>
 
                     @if (ViewBag.MostrarLinkRegisto == true)
                     {
-                        <div class="mt-2 p-3 border border-warning rounded bg-light">
+                        <div class="mt-2 p-3 border bg-theme-surface rounded">
                             <strong>Gostaria de criar conta?</strong>
                             <p class="text-muted mb-2 small">Parece que este e-mail ainda não está registado. Pode criar uma conta agora ou corrigir o e-mail acima.</p>
                             <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-sm btn-outline-primary">Criar Nova Conta</a>
