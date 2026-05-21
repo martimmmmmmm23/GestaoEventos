@@ -45,7 +45,23 @@
         <div class="col-md-6">
             <div class="bg-theme-surface p-4 rounded-3 shadow-sm h-100">
                 <div id="ContentDetalhesEvento">
-                    <p class="text-muted text-center">Selecione um evento para ver os detalhes.</p>
+                    @if (Model?.EventoSelecionado != null)
+                    {
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">@Model.EventoSelecionado.Nome</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Data:</strong> @Model.EventoSelecionado.Data.ToString("dd/MM/yyyy")</p>
+                                <p><strong>Local:</strong> @Model.EventoSelecionado.Local</p>
+                                <p class="mb-0">@Model.EventoSelecionado.Descricao</p>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">Selecione um evento e clique em "Ver" para carregar os detalhes.</p>
+                    }
                 </div>
             </div>
         </div>
@@ -56,57 +72,4 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
-    <script>
-        // 1. Espera que o documento carregue e escuta alterações no Dropdown
-        document.getElementById('DropdownEvento').addEventListener('change', function () {
-
-            // 2. Guarda o ID do evento selecionado (ex: "1", "2" ou "" se for a opção padrão)
-            const eventoId = this.value;
-            const container = document.getElementById('ContentDetalhesEvento');
-
-            // 3. Se o utilizador selecionou a opção vazia "-- Escolha um evento --"
-            if (!eventoId) {
-                container.innerHTML = `
-                    <div class="d-flex h-100 align-items-center justify-content-center text-muted text-center">
-                        <div>
-                            <p class="mb-0">Selecione um evento para ver os detalhes informativos.</p>
-                        </div>
-                    </div>`;
-                return;
-            }
-
-            // 4. Mostra um Spinner de Loading (efeito visual de carregamento do Bootstrap)
-            container.innerHTML = `
-                <div class="d-flex h-100 align-items-center justify-content-center">
-                    <div class="spinner-border text-success" role="status">
-                        <span class="visually-hidden">A carregar...</span>
-                    </div>
-                </div>`;
-
-            // 5. Faz a chamada AJAX (Fetch) ao teu Controller
-            // Nota: Altera 'Inscricoes' se o teu Controller tiver outro nome (ex: 'Eventos')
-            fetch(`/Inscricoes/ObterDetalhesEvento?id=${eventoId}`)
-                .then(response => {
-                    // Se o servidor responder com erro (ex: 404 ou 500)
-                    if (!response.ok) {
-                        throw new Error('Não foi possível encontrar os dados do evento.');
-                    }
-                    // Transforma a resposta em texto puro (que é o HTML da nossa Partial View)
-                    return response.text();
-                })
-                .then(htmlDeResposta => {
-                    // 6. Injeta o HTML recebido diretamente dentro do painel da direita
-                    container.innerHTML = htmlDeResposta;
-                })
-                .catch(error => {
-                    // Trata qualquer erro de rede ou de servidor
-                    console.error('Erro na requisição AJAX:', error);
-                    container.innerHTML = `
-                        <div class="alert alert-danger m-3 small text-center" role="alert">
-                            Erro ao carregar os detalhes do evento. Por favor, tente novamente.
-                        </div>`;
-                });
-        });
-    </script>
 }

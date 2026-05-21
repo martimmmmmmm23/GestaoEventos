@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GestãoEventos.Data.Classes;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace GestãoEventos.ViewModel.Inscricoes
 {
@@ -22,7 +23,9 @@ namespace GestãoEventos.ViewModel.Inscricoes
 
         public string? NomeEvento { get; set; }
 
-        public SelectList? EventosDisponiveis { get; set; } // SelectList facilita a criação de dropdowns no Razor, permitindo ver a lista de opções para o utilizador escolher.
+        public SelectList? EventosDisponiveis { get; set; }
+
+        public Evento? EventoSelecionado { get; set; }
 
 
     }
