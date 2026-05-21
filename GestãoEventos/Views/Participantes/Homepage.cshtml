@@ -30,10 +30,7 @@
                         <button type="button" class="btn btn-primary px-4 rounded-pill" onclick="mostrarFormulario()">
                             Alterar Dados
                         </button>
-                        @if (User.IsInRole("Organizador"))
-                        {
-                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill ms-2">Voltar à Lista</a>
-                        }
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary rounded-pill ms-2">Voltar à Homepage</a>
                     </div>
 
                     <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger rounded-pill px-4">
@@ -98,7 +95,7 @@
     </div>
     <div class="col-md-6">
         <div class="bg-theme-surface p-4 rounded-3 shadow-sm h-100">
-            <h5 class="fw-bold mb-4" style="color: var(--primary-accent);">Lista de Participantes</h5>
+            <h5 class="fw-bold mb-4" style="color: var(--primary-accent);">Lista dos meus Eventos</h5>
 
             @if (Model.Inscricoes != null && Model.Inscricoes.Any())
             {
