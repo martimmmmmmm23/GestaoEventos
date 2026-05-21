@@ -71,7 +71,7 @@ namespace GestãoEventos.Controllers
             if (participante == null) return NotFound();
 
             // Bloqueia se o utilizador não for Organizador e tentar ver outro perfil
-            if (!User.IsInRole("Organizador") && participante.Email != User.Identity.Name)
+            if (participante.Email != User.Identity.Name)
             {
                 return Forbid();
             }
