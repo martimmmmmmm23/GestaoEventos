@@ -70,7 +70,7 @@ namespace GestãoEventos.Controllers
             var participante = await _context.Participantes.FindAsync(id);
             if (participante == null) return NotFound();
 
-            // Bloqueia se o utilizador não for Organizador e tentar ver outro perfil
+            // Bloqueia se o utilizador tentar ver outro perfil
             if (participante.Email != User.Identity.Name)
             {
                 return Forbid();
