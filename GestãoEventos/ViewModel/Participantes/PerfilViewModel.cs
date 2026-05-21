@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GestãoEventos.Data.Classes;
+using System.ComponentModel.DataAnnotations;
 
 namespace GestãoEventos.ViewModel.Participantes
 {
-    public class EditarPerfilViewModel
+    public class PerfilViewModel
     {
         public int Id { get; set; }
 
@@ -34,5 +35,7 @@ namespace GestãoEventos.ViewModel.Participantes
         [Display(Name = "Confirmar Nova Palavra-passe")]
         [Compare("NovaPassword", ErrorMessage = "As novas palavras-passe não coincidem.")]
         public string? ConfirmarNovaPassword { get; set; }
+
+        public ICollection<Inscricao> Inscricoes { get; set; } = new List<Inscricao>();
     }
 }

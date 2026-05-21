@@ -60,14 +60,16 @@ namespace GestãoEventos.Controllers
             return RedirectToPage("/Account/Register", new { area = "Identity" });
         }
 
-
         // GET: Participantes/Edit/5
         [Authorize]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> HomePage(int? id)
         {
             if (id == null) return NotFound();
+            var participante = await _context.Participantes
+                .Include(p => p.Inscricoes)
+                .ThenInclude(i => i.Evento)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
-            var participante = await _context.Participantes.FindAsync(id);
             if (participante == null) return NotFound();
 
             // Bloqueia se o utilizador tentar ver outro perfil
@@ -76,14 +78,15 @@ namespace GestãoEventos.Controllers
                 return Forbid();
             }
 
-            var model = new EditarPerfilViewModel
+            var model = new PerfilViewModel
             {
                 Id = participante.Id,
                 NomeAtual = participante.Nome,
                 EmailAtual = participante.Email,
                 NovoNome = participante.Nome,
                 NovoEmail = participante.Email,
-                ConfirmarNovoEmail = participante.Email // Preenchido para passar na validação automática
+                ConfirmarNovoEmail = participante.Email,
+                Inscricoes = participante.Inscricoes
             };
 
             return View(model);
@@ -93,7 +96,7 @@ namespace GestãoEventos.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Edit(int id, EditarPerfilViewModel model)
+        public async Task<IActionResult> HomePage(int id, PerfilViewModel model)
         {
             if (id != model.Id) return NotFound();
 
@@ -160,7 +163,8 @@ namespace GestãoEventos.Controllers
 
             return RepopularView(model, participante);
         }
-        private IActionResult RepopularView(EditarPerfilViewModel model, Participante p)
+
+        private IActionResult RepopularView(PerfilViewModel model, Participante p)
         {
             model.NomeAtual = p.Nome;
             model.EmailAtual = p.Email;
