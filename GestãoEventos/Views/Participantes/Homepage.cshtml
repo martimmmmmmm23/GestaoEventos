@@ -32,10 +32,12 @@
                         </button>
                         <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary rounded-pill ms-2">Voltar à Homepage</a>
                     </div>
-
-                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger rounded-pill px-4">
-                        Eliminar Conta
-                    </a>
+                    @if (User.IsInRole("Utilizador"))
+                    {
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger rounded-pill px-4">
+                            Eliminar Conta
+                        </a>
+                    } 
                 </div>
             </div>
 
