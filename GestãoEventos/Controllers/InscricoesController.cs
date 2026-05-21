@@ -22,7 +22,7 @@ namespace GestãoEventos.Controllers
         public async Task<IActionResult> Index()
         {
             // 1. Guardar o email numa variável ANTES da consulta à base de dados
-            var userEmail = User.Identity?.Name; 
+            var userEmail = User.Identity?.Name;
 
             // Prepara a consulta base
             var query = _context.Inscricoes
@@ -42,15 +42,19 @@ namespace GestãoEventos.Controllers
             return View(inscricoes);
         }
 
+        private async Task<Inscricao?> DadosEventosParticipante(int? eventoId, int? participanteId)
+        {
+            return await _context.Inscricoes
+                .Include(i => i.Evento)
+                .Include(i => i.Participante)
+                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
+        }
         // GET: Inscricoes/Details/5
         public async Task<IActionResult> Details(int? eventoId, int? participanteId) // chave composta, por isso precisamos dos dois IDs para identificar a inscrição específica.
         {
             if (eventoId == null || participanteId == null) return NotFound();
 
-            var inscricao = await _context.Inscricoes
-                .Include(i => i.Evento)
-                .Include(i => i.Participante)
-                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId); //
+            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
 
             if (inscricao == null) return NotFound();
 
@@ -97,20 +101,14 @@ namespace GestãoEventos.Controllers
                 {
                     model.EventoId = evento.Id;
                     model.NomeEvento = evento.Nome;
-
                 }
             }
-                if (User.Identity != null && User.Identity.IsAuthenticated)
-                {
-                    model.Email = User.Identity.Name; // Guarda o email do utilizador logado no ViewModel
-                }
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                model.Email = User.Identity.Name; // Guarda o email do utilizador logado no ViewModel
+            }
 
-                model.EventosDisponiveis = new SelectList(
-                    _context.Eventos.Where(e => e.Data >= DateTime.Now),
-                    "Id",
-                    "Nome",
-                    model.EventoId
-                );
+            CarregarDadosEventos(model); // Carrega os eventos futuros para a dropdown
             return View(model);
         }
 
@@ -190,6 +188,7 @@ namespace GestãoEventos.Controllers
             return View(model);
         }
 
+
         // GET: Inscricoes/Edit/5
 
         [Authorize(Roles = "Organizador")] // Apenas organizadores podem editar
@@ -200,10 +199,7 @@ namespace GestãoEventos.Controllers
                 return NotFound();
             }
 
-            var inscricao = await _context.Inscricoes
-                .Include(i => i.Evento)
-                .Include(i => i.Participante)
-                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
+            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
 
             if (inscricao == null)
             {
@@ -265,8 +261,7 @@ namespace GestãoEventos.Controllers
             {
                 try
                 {
-                    var inscricaoAntiga = await _context.Inscricoes // Procura a inscrição antiga usando os IDs antigos para garantir que estamos a editar a inscrição correta
-                        .FirstOrDefaultAsync(i => i.EventoId == IdEventoAntigo && i.ParticipanteId == IdParticipanteAntigo);
+                    var inscricaoAntiga = await DadosEventosParticipante(IdEventoAntigo, IdParticipanteAntigo); // Busca a inscrição antiga usando os IDs antigos.
 
                     if (inscricaoAntiga != null)
                     {
@@ -277,7 +272,7 @@ namespace GestãoEventos.Controllers
                     _context.Inscricoes.Add(inscricao);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException) 
+                catch (DbUpdateConcurrencyException)
                 {
                     if (!InscricaoExists(inscricao.EventoId, inscricao.ParticipanteId))
                     {
@@ -309,10 +304,7 @@ namespace GestãoEventos.Controllers
         {
             if (eventoId == null || participanteId == null) return NotFound();
 
-            var inscricao = await _context.Inscricoes
-                .Include(i => i.Evento)
-                .Include(i => i.Participante)
-                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
+            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
 
             if (inscricao == null) return NotFound();
 
@@ -325,8 +317,7 @@ namespace GestãoEventos.Controllers
         [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> DeleteConfirmed(int eventoId, int participanteId)
         {
-            var inscricao = await _context.Inscricoes
-                .FirstOrDefaultAsync(m => m.EventoId == eventoId && m.ParticipanteId == participanteId);
+            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
 
             if (inscricao != null)
             {
