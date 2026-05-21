@@ -15,7 +15,13 @@
             <div class="bg-theme-surface p-4 rounded-3 shadow-sm h-100">
                 <div class="form-group mb-3">
                     <label asp-for="Email" class="control-label"></label>
-                    <input asp-for="Email" class="form-control" placeholder="exemplo@email.com" />
+
+                    @* O campo fica 'readonly' se o utilizador estiver logado E NÃO for Organizador *@
+                    <input asp-for="Email"
+                           class="form-control"
+                           placeholder="exemplo@email.com"
+                           readonly="@(User.Identity != null && User.Identity.IsAuthenticated && !User.IsInRole("Organizador") ? "readonly" : null)" />
+
                     <span asp-validation-for="Email" class="text-danger"></span>
 
                     @if (ViewBag.MostrarLinkRegisto == true)
