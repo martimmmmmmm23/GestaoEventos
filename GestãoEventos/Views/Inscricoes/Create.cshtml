@@ -30,7 +30,8 @@
                 </div>
                 <div class="form-group mb-3">
                     <label asp-for="EventoId" class="control-label">Selecionar Evento</label>
-                    <select asp-for="EventoId" id="DropdownEvento" class="form-control" asp-items="Model.EventosDisponiveis">
+                    <select asp-for="EventoId" id="DropdownEvento" class="form-control" asp-items="Model.EventosDisponiveis"
+                            onchange="this.form.action='/Inscricoes/CarregarDetalhes'; this.form.submit();">
                         <option value="">-- Escolha um evento --</option>
                     </select>
                     <span asp-validation-for="EventoId" class="text-danger"></span>
@@ -44,38 +45,36 @@
         </div>
         <div class="col-md-6">
             <div class="bg-theme-surface p-4 rounded-3 shadow-sm h-100">
-                <div id="ContentDetalhesEvento">
-                    @if (Model?.EventoSelecionado != null)
-                    {
-                        <div class="d-flex flex-column h-100">
-                            <h3 class="text-theme-main fw-bold mb-1">@Model.EventoSelecionado.Nome</h3>
-                            <hr class="border-color my-3" />
+                @if (Model?.EventoSelecionado != null)
+                {
+                    <div class="d-flex flex-column h-100">
+                        <h3 class="text-theme-main fw-bold mb-1">@Model.EventoSelecionado.Nome</h3>
+                        <hr class="border-color my-3" />
 
-                            <div class="row g-3 flex-grow-1">
-                                <dl class="row text-theme-main">
-                                    <dt class="col-sm-3 text-theme-muted">Data</dt>
-                                    <dd class="col-sm-9">@Model.EventoSelecionado.Data.ToString("dd/MM/yyyy")</dd>
+                        <div class="row g-3 flex-grow-1">
+                            <dl class="row text-theme-main">
+                                <dt class="col-sm-3 text-theme-muted">Data</dt>
+                                <dd class="col-sm-9">@Model.EventoSelecionado.Data.ToString("dd/MM/yyyy")</dd>
 
-                                    <dt class="col-sm-3 text-theme-muted">Hora</dt>
-                                    <dd class="col-sm-9 fw-bold">@Model.EventoSelecionado.Hora</dd>
+                                <dt class="col-sm-3 text-theme-muted">Hora</dt>
+                                <dd class="col-sm-9 fw-bold">@Model.EventoSelecionado.Hora</dd>
 
-                                    <dt class="col-sm-3 text-theme-muted">Local</dt>
-                                    <dd class="col-sm-9">@Model.EventoSelecionado.Local</dd>
+                                <dt class="col-sm-3 text-theme-muted">Local</dt>
+                                <dd class="col-sm-9">@Model.EventoSelecionado.Local</dd>
 
-                                    <dt class="col-sm-3 text-theme-muted">Preço</dt>
-                                    <dd class="col-sm-9">@Model.EventoSelecionado.Preco</dd>
+                                <dt class="col-sm-3 text-theme-muted">Preço</dt>
+                                <dd class="col-sm-9">@Model.EventoSelecionado.Preco</dd>
 
-                                    <dt class="col-sm-3 text-theme-muted">Descrição</dt>
-                                    <dd class="col-sm-9">@Model.EventoSelecionado.Descricao</dd>
-                                </dl>
-                            </div>
+                                <dt class="col-sm-3 text-theme-muted">Descrição</dt>
+                                <dd class="col-sm-9">@Model.EventoSelecionado.Descricao</dd>
+                            </dl>
                         </div>
-                    }
-                    else
-                    {
-                        <p class="text-muted text-center">Selecione um evento e clique em "Ver" para carregar os detalhes.</p>
-                    }
-                </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center">Selecione um evento e clique em "Ver" para carregar os detalhes.</p>
+                }
             </div>
         </div>
     </div>
