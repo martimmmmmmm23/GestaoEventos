@@ -93,8 +93,31 @@
                                 }
                                 <p class="card-text text-theme-muted small"><i class="bi bi-geo-alt"></i> @item.Local</p>
                             </div>
+
                             <div class="card-footer bg-transparent border-0 pb-3 pt-0">
-                                <a asp-controller="Inscricoes" asp-action="Create" asp-route-id="@item.Id" class="btn btn-sm btn-primary w-100 py-2 fw-bold">Inscreva-se</a>
+                                @{
+                                    var userId = UserManager.GetUserId(User); //Descobrir id do utilizador logado
+
+                                    bool jaInscrito = User.Identity != null && User.Identity.IsAuthenticated && item.Inscricoes.Any(i => i.Participante.Email == User.Identity.Name);
+
+                                    bool esgotado = item.Lugares != null && item.Inscricoes.Count() >= item.Lugares;
+                                }
+                                @if (jaInscrito)
+                                {
+                                    <label class="btn btn-sm btn-secondary w-100 py-2 fw-bold" style="opacity: 0.8;">
+                                        <i class="bi bi-slash-circle me-1"></i> Já se encontra inscrito
+                                    </label>
+                                }
+                                else if (esgotado)
+                                {
+                                    <label class="btn btn-sm btn-secondary w-100 py-2 fw-bold" style="opacity: 0.8;">
+                                        <i class="bi bi-slash-circle me-1"></i> Lotação esgotada
+                                    </label>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Inscricoes" asp-action="Create" asp-route-id="@item.Id" class="btn btn-sm btn-primary w-100 py-2 fw-bold">Inscreva-se</a>
+                                }
                             </div>
                         </div>
                     </div>
