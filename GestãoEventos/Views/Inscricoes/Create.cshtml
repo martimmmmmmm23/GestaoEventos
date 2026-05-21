@@ -47,14 +47,27 @@
                 <div id="ContentDetalhesEvento">
                     @if (Model?.EventoSelecionado != null)
                     {
-                        <div class="card border-success">
-                            <div class="card-header bg-success text-white">
-                                <h5 class="mb-0">@Model.EventoSelecionado.Nome</h5>
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Data:</strong> @Model.EventoSelecionado.Data.ToString("dd/MM/yyyy")</p>
-                                <p><strong>Local:</strong> @Model.EventoSelecionado.Local</p>
-                                <p class="mb-0">@Model.EventoSelecionado.Descricao</p>
+                        <div class="d-flex flex-column h-100">
+                            <h3 class="text-theme-main fw-bold mb-1">@Model.EventoSelecionado.Nome</h3>
+                            <hr class="border-color my-3" />
+
+                            <div class="row g-3 flex-grow-1">
+                                <dl class="row text-theme-main">
+                                    <dt class="col-sm-3 text-theme-muted">Data</dt>
+                                    <dd class="col-sm-9">@Model.EventoSelecionado.Data.ToString("dd/MM/yyyy")</dd>
+
+                                    <dt class="col-sm-3 text-theme-muted">Hora</dt>
+                                    <dd class="col-sm-9 fw-bold">@Model.EventoSelecionado.Hora</dd>
+
+                                    <dt class="col-sm-3 text-theme-muted">Local</dt>
+                                    <dd class="col-sm-9">@Model.EventoSelecionado.Local</dd>
+
+                                    <dt class="col-sm-3 text-theme-muted">Preço</dt>
+                                    <dd class="col-sm-9">@Model.EventoSelecionado.Preco</dd>
+
+                                    <dt class="col-sm-3 text-theme-muted">Descrição</dt>
+                                    <dd class="col-sm-9">@Model.EventoSelecionado.Descricao</dd>
+                                </dl>
                             </div>
                         </div>
                     }
