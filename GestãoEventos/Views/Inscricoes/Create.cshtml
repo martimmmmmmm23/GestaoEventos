@@ -44,7 +44,7 @@
 
                 <div class="form-group mt-4">
                     <input type="submit" value="Confirmar" class="btn btn-primary px-5 rounded-pill" />
-                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill ms-2">Voltar à Lista</a>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary rounded-pill ms-2">Voltar à Lista</a>
                 </div>  
             </div>
         </div>
@@ -59,10 +59,10 @@
                         <div class="row g-3 flex-grow-1">
                             <dl class="row text-theme-main">
                                 <dt class="col-sm-3 text-theme-muted">Data</dt>
-                                <dd class="col-sm-9">@Model.EventoSelecionado.Data.ToString("dd/MM/yyyy")</dd>
+                                <dd class="col-sm-9">@Model.EventoSelecionado.Data.ToString("dd MMM yyyy")</dd>
 
                                 <dt class="col-sm-3 text-theme-muted">Hora</dt>
-                                <dd class="col-sm-9 fw-bold">@Model.EventoSelecionado.Hora</dd>
+                                <dd class="col-sm-9 fw-bold">@Model.EventoSelecionado.Hora.ToString(@"hh\:mm")</dd>
 
                                 <dt class="col-sm-3 text-theme-muted">Local</dt>
                                 <dd class="col-sm-9">@Model.EventoSelecionado.Local</dd>
@@ -78,7 +78,7 @@
                 }
                 else
                 {
-                    <p class="text-muted text-center">Selecione um evento e clique em "Ver" para carregar os detalhes.</p>
+                    <p class="text-muted text-center">Selecione um evento para carregar os detalhes.</p>
                 }
             </div>
         </div>

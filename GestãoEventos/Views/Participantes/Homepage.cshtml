@@ -97,46 +97,45 @@
         </div>
     </div>
     <div class="col-md-6">
-        @* Lista de Eventos Inscritos pelo Utilizador *@
-        @if (Model.Inscricoes != null && Model.Inscricoes.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr class="text-theme-muted small text-uppercase">
-                            <th scope="col" class="py-3">Nome do Evento</th>
-                            <th scope="col" class="py-3">Data do Evento</th>
-                            <th scope="col" class="py-3 text-end">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-theme-main">
-                        @foreach (var item in Model.Inscricoes)
-                        {
+        <div class="bg-theme-surface p-4 rounded-3 shadow-sm h-100">
+            <h5 class="fw-bold mb-4" style="color: var(--primary-accent);">Lista de Participantes</h5>
+
+            @if (Model.Inscricoes != null && Model.Inscricoes.Any())
+            {
+                <div class="table">
+                    <table class="table">
+                        <thead class="text-theme-main">
                             <tr>
-                                <td class="py-3 fw-semibold">
-                                    @(item.Evento.Nome)
-                                </td>
-                                <td class="py-3 text-end text-theme-muted font-monospace small">
-                                    @(item.Evento.Data)
-                                </td>
-                                <td class="text-end">
-                                    <a asp-controller="Inscricoes" asp-action="Delete" asp-route-participanteId="@item.ParticipanteId" asp-route-eventoId="@item.EventoId" class="btn btn-danger" style="color: var(--primary-accent);">Cancelar Inscrição</a>
-                                </td>
+                                <th>Nome do Evento</th>
+                                <th>Data do Evento</th>
+                                <th class="text-end">Ação</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <div class="d-flex h-75 align-items-center justify-content-center text-center p-4">
-                <div class="text-theme-muted">
-                    <i class="bi bi-people fs-2 d-block mb-2 text-opacity-50"></i>
-                    <p class="mb-0 small">Ainda não existem participantes inscritos neste evento.</p>
+                        </thead>
+                        <tbody class="text-theme-main">
+                            @foreach (var item in Model.Inscricoes)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@(item.Evento.Nome)</td>
+                                    <td>@item.Evento.Data.ToString("dd MMM yyyy") | @item.Evento.Hora.ToString(@"hh\:mm")</td>
+                                    <td class="text-end">
+                                        <a asp-controller="Inscricoes" asp-action="Delete" asp-route-participanteId="@item.ParticipanteId" asp-route-eventoId="@item.EventoId" class="mx-1" style="color: var(--primary-accent);">Cancelar Inscrição</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-        }
+            }
+            else
+            {
+                <div class="d-flex h-75 align-items-center justify-content-center text-center p-4">
+                    <div class="text-theme-muted">
+                        <i class="bi bi-people fs-2 d-block mb-2 text-opacity-50"></i>
+                        <p class="mb-0 small">Ainda não existem participantes inscritos neste evento.</p>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
 </div>
 

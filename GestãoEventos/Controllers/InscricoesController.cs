@@ -153,7 +153,7 @@ namespace GestãoEventos.Controllers
                 _context.Inscricoes.Add(novaInscricao);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("Index", "Eventos");
+                return RedirectToAction("Index", "Home");
             }
 
             CarregarDadosEventos(model);
@@ -201,6 +201,21 @@ namespace GestãoEventos.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("Details", "Eventos", new { id = eventoId }); // Redireciona para a lista de inscrições após a exclusão
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Utilizador")]
+        public async Task<IActionResult> DeleteParticipante(int? eventoId, int? participanteId)
+        {
+            var inscricao = await DadosEventosParticipante(eventoId, participanteId);
+
+            if (inscricao != null)
+            {
+                _context.Inscricoes.Remove(inscricao);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Index", "Home");
         }
     }
 }
