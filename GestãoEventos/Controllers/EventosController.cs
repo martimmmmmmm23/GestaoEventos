@@ -196,6 +196,7 @@ namespace GestãoEventos.Controllers
             evento.Descricao = model.Descricao;
             evento.Hora = model.Hora;
             evento.Preco = model.Preco;
+            evento.Lugares = model.Lugares;
 
             if (model.ImageFile != null)
             {
