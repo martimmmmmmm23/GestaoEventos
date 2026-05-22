@@ -113,7 +113,8 @@ body {
 /* Cor do "brilho" à volta do botão switch */
 .form-check-input:focus {
     border-color: var(--primary-accent) !important;
-    box-shadow: 0 0 0 0.25rem rgba(212, 163, 115, 0.25) !important; /*Substitui a cor do brrilho*/
+    outline: none !important;
+    box-shadow: none !important; /* Remove sombra outline*/
 }
 
 /* Imagens - preto e branco por default excepto quando passamos o rato por cima */
@@ -124,4 +125,9 @@ body {
 
 .cartao-evento img:hover {
     filter: grayscale(0%);
+}
+
+#btn-exportar:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }
