@@ -287,7 +287,7 @@ namespace GestãoEventos.Controllers
                 csv.AppendLine($"{insc.Participante.Nome},{insc.Participante.Email}");
             }
 
-            var fileName = $"evento_{SanitizeFileName(evento.Nome)}_participantes.csv";
+            var fileName = $"Lista_Participantes_{SanitizeFileName(evento.Nome)}.csv";
 
             return File(
                 Encoding.UTF8.GetBytes(csv.ToString()),
