@@ -32,7 +32,7 @@
                         </button>
                         <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary rounded-pill ms-2">Voltar à Homepage</a>
                     </div>
-                    @if (User.IsInRole("Utilizador"))
+                    @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Utilizador"))
                     {
                         <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger rounded-pill px-4">
                             Eliminar Conta

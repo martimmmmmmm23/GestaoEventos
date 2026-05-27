@@ -69,13 +69,13 @@
                                     }
                                     </span>
                                     <span class="fs-6">
-                                        @if (item.Preco == 0)
+                                        @if (item.Preco == 0 || item.Preco == null)
                                         {
                                             <span class="badge bg-success text-white rounded-pill px-3 py-1 fw-bold" style="letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(25, 135, 84, 0.4);">GRÁTIS</span>
                                         }
                                         else
                                         {
-                                            @item.Preco.ToString("0.00 €")
+                                            @item.Preco.Value.ToString("0.00 €")
                                         }
                                     </span>
 
