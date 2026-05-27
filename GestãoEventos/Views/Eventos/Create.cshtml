@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Criar";
+    var hoje = DateTime.Now.ToString("yyyy-MM-dd");
 }
 
 <h1 class="text-theme-main fw-bold my-4">@ViewData["Title"]</h1>
@@ -17,25 +18,25 @@
 
                 <div class="form-group mb-3">
                     <label asp-for="Nome" class="control-label text-theme-main fw-bold mb-1"></label>
-                    <input asp-for="Nome" class="form-control" />
+                    <input asp-for="Nome" class="form-control" placeholder="Open Day ATEC 2026" />
                     <span asp-validation-for="Nome" class="text-danger"></span>
                 </div>
+                <div class="row">
+                    <div class="form-group mb-3 col-md-6">
+                        <label asp-for="Data" class="control-label text-theme-main fw-bold mb-1"></label>
+                        <input asp-for="Data" class="form-control" type="date" value="@hoje" />
+                        <span asp-validation-for="Data" class="text-danger"></span>
+                    </div>
 
-                <div class="form-group mb-3">
-                    <label asp-for="Data" class="control-label text-theme-main fw-bold mb-1"></label>
-                    <input asp-for="Data" class="form-control" type="date" />
-                    <span asp-validation-for="Data" class="text-danger"></span>
+                    <div class="form-group mb-3 col-md-6">
+                        <label asp-for="Hora" class="control-label text-theme-main fw-bold mb-1"></label>
+                        <input asp-for="Hora" class="form-control" type="time" value="12:00" />
+                        <span asp-validation-for="Hora" class="text-danger"></span>
+                    </div>
                 </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="Hora" class="control-label text-theme-main fw-bold mb-1"></label>
-                    <input asp-for="Hora" class="form-control" type="time" />
-                    <span asp-validation-for="Hora" class="text-danger"></span>
-                </div>
-
                 <div class="form-group mb-3">
                     <label asp-for="Local" class="control-label text-theme-main fw-bold mb-1"></label>
-                    <input asp-for="Local" class="form-control" />
+                    <input asp-for="Local" class="form-control" placeholder="Porto"/>
                     <span asp-validation-for="Local" class="text-danger"></span>
                 </div>
 
@@ -103,4 +104,16 @@
             }
         });
     </script>
+     @* Mudar Estilo das Horas
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        flatpickr("#inputHora", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            minuteIncrement: 5,
+            time_24hr: true
+        });
+    </script>  *@
 }

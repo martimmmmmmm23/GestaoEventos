@@ -146,6 +146,8 @@ namespace GestãoEventos.Areas.Identity.Pages.Account
                     _context.Add(participante);
                     await _context.SaveChangesAsync();
 
+                    await _userManager.AddToRoleAsync(user, "Utilizador");
+
                     // 3. Faz o Login Imediato e manda o utilizador para a página inicial
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(returnUrl);

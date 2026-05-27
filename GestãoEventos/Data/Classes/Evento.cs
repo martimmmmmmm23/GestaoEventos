@@ -35,8 +35,7 @@ namespace GestãoEventos.Data.Classes
 
         [Display(Name = "Preço")]
         [Column(TypeName = "decimal(10,2)")]
-        [Required]
-        public decimal Preco { get; set; }
+        public decimal? Preco { get; set; }
 
         [Display(Name = "Total de Lugares")]
         public int? Lugares { get; set; } // null indica que não há limite de lugares

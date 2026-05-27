@@ -36,13 +36,4 @@ namespace GestãoEventos.Data
                 .OnDelete(DeleteBehavior.Cascade); // Se apagar o Participante, apaga as Inscrições dele
         }
     }
-
-    ///--- CONFIGURAÇÃO DA RELAÇÃO MUITOS-PARA-MUITOS (M:N) ---
-    // 1. Definimos 'EventoId' e 'ParticipanteId' como uma Chave Primária Composta
-    // 2. O EF Core identifica automaticamente as Chaves Estrangeiras (FKs) porque:
-    //    - A classe 'Inscricao' tem as propriedades de objeto e ID de Evento e Participante
-    //    - As classes 'Evento' e 'Participante' têm listas (ICollection) de 'Inscricao'
-    // 3. Conclusão do EFcore: Isto é claramente uma tabela de ligação (Muitos-para-Muitos).
-    // Vou criar as chaves estrangeiras (Foreign Keys) na base de dados automaticamente!"
-
 }
