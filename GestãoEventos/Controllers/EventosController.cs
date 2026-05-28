@@ -163,7 +163,7 @@ namespace GestãoEventos.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Organizador")]
-        public async Task<IActionResult> Edit(int id, EventoViewModel model)
+        public async Task<IActionResult> Edit(int id, EventoViewModel model, bool RemoverImagem = false)
         {
           
             var evento = await _context.Eventos.FindAsync(id);
@@ -198,7 +198,11 @@ namespace GestãoEventos.Controllers
             evento.Preco = model.Preco;
             evento.Lugares = model.Lugares;
 
-            if (model.ImageFile != null)
+            if (RemoverImagem)
+            {
+                evento.Image = null;
+            }
+            else if (model.ImageFile != null)
             {
                 if (model.ImageFile.Length > 5 * 1024 * 1024)
                 {

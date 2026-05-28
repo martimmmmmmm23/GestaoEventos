@@ -8,15 +8,15 @@ namespace GestãoEventos.ViewModel.Eventos
 {
     public class EventoViewModel
     {
-        [Required]
+        [Required(ErrorMessage = "O campo Nome é de preenchimento obrigatório.")]
         [StringLength(100)]
         public string Nome { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "O campo Data é obrigatório.")]
         [DataType(DataType.Date)]
         public DateTime Data { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "O campo Local é de preenchimento obrigatório.")]
         public string Local { get; set; }
 
         [Display(Name = "Imagem")]
@@ -29,7 +29,7 @@ namespace GestãoEventos.ViewModel.Eventos
         public string? Descricao { get; set; }
 
         [Display(Name = "Hora")]
-        [Required]
+        [Required(ErrorMessage = "O campo Hora é obrigatório.")]
         public TimeSpan Hora { get; set; }
 
         [Display(Name = "Preço")]
