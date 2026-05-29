@@ -26,7 +26,8 @@ namespace GestãoEventos.Controllers
         [Authorize(Roles = "Organizador")]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Eventos.ToListAsync());
+            var eventos = await _context.Eventos.OrderBy(e => e.Data).ToListAsync();
+            return View(eventos);
         }
 
         // GET: Eventos/Details/5
