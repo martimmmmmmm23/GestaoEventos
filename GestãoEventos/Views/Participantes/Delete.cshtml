@@ -21,7 +21,14 @@
         <form asp-action="Delete">
             <input type="hidden" asp-for="Id" />
             <input type="submit" value="Eliminar" class="btn btn-danger px-5 rounded-pill" />
-            <a asp-action="Index" class="btn btn-secondary px-5 rounded-pill">Cancelar</a>
-        </form>
+            @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Utilizador"))
+            {
+                <a asp-action="Homepage" asp-route-id="@Model.Id" class="btn btn-secondary px-5 rounded-pill">Cancelar</a>
+            }
+            else
+            {
+                <a asp-action="Index" class="btn btn-secondary px-5 rounded-pill">Cancelar</a>
+            }
+            </form>
     </div>
 </div>

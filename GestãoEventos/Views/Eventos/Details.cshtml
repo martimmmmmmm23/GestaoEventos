@@ -25,7 +25,14 @@
                 <dd class="col-sm-9 text-break">@Model.Local</dd>
 
                 <dt class="col-sm-3 text-theme-muted">Preço</dt>
-                <dd class="col-sm-9">@Model.Preco €</dd>
+                @if (Model.Preco != null && Model.Preco != 0)
+                {
+                    <dd class="col-sm-9 text-break">@Model.Preco €</dd>
+                }
+                else
+                {
+                    <dd class="col-sm-9 text-break">Grátis</dd>
+                }
 
                 <dt class="col-sm-3 text-theme-muted">Descrição</dt>
                 @if (Model.Descricao != null)

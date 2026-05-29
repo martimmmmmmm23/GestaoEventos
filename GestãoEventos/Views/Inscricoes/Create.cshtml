@@ -68,7 +68,14 @@
                                 <dd class="col-sm-9 text-break">@Model.EventoSelecionado.Local</dd>
 
                                 <dt class="col-sm-3 text-theme-muted">Preço</dt>
-                                <dd class="col-sm-9">@Model.EventoSelecionado.Preco €</dd>
+                                @if (Model.EventoSelecionado.Preco != null && Model.EventoSelecionado.Preco != 0)
+                                {
+                                    <dd class="col-sm-9 text-break">@Model.EventoSelecionado.Preco €</dd>
+                                }
+                                else
+                                {
+                                    <dd class="col-sm-9 text-break">Grátis</dd>
+                                }
 
                                 <dt class="col-sm-3 text-theme-muted">Descrição</dt>
                                 <dd class="col-sm-9 text-break">@Model.EventoSelecionado.Descricao</dd>
