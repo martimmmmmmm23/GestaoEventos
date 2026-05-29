@@ -53,7 +53,7 @@
                 @if (Model?.EventoSelecionado != null)
                 {
                     <div class="d-flex flex-column h-100">
-                        <h3 class="text-theme-main fw-bold mb-1">@Model.EventoSelecionado.Nome</h3>
+                        <h3 class="text-theme-main fw-bold mb-1 text-break">@Model.EventoSelecionado.Nome</h3>
                         <hr class="border-color my-3" />
 
                         <div class="row g-3 flex-grow-1">
@@ -65,13 +65,13 @@
                                 <dd class="col-sm-9">@Model.EventoSelecionado.Hora.ToString(@"hh\:mm")</dd>
 
                                 <dt class="col-sm-3 text-theme-muted">Local</dt>
-                                <dd class="col-sm-9">@Model.EventoSelecionado.Local</dd>
+                                <dd class="col-sm-9 text-break">@Model.EventoSelecionado.Local</dd>
 
                                 <dt class="col-sm-3 text-theme-muted">Preço</dt>
                                 <dd class="col-sm-9">@Model.EventoSelecionado.Preco €</dd>
 
                                 <dt class="col-sm-3 text-theme-muted">Descrição</dt>
-                                <dd class="col-sm-9">@Model.EventoSelecionado.Descricao</dd>
+                                <dd class="col-sm-9 text-break">@Model.EventoSelecionado.Descricao</dd>
                             </dl>
                         </div>
                     </div>

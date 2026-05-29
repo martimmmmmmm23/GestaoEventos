@@ -1,3 +1,4 @@
+using AspNetCoreGeneratedDocument;
 using GestãoEventos.Data;
 using GestãoEventos.Models;
 using Humanizer.Configuration;
@@ -29,6 +30,12 @@ namespace GestãoEventos
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddRazorPages(options =>
+            {
+                // Bloqueia a pasta Manage exigindo uma política que não existe (Bloqueio Total)
+                options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage", "UnAuthorized");
+            });
 
             builder.Services.AddDbContext<GestaoEventosDbContext>(options =>
                     options.UseSqlServer(connectionString));
